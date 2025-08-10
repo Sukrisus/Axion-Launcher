@@ -67,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_dashboard:
                 selectedFragment = new DashboardFragment();
                 break;
+            case R.id.nav_version_manager:
+                selectedFragment = new VersionManagerFragment();
+                break;
             case R.id.nav_settings:
                 selectedFragment = new SettingsFragment();
                 break;
@@ -83,5 +86,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+    
+    public void updateNavigationSelection(int menuItemId) {
+        navigationView.setCheckedItem(menuItemId);
     }
 }

@@ -6,6 +6,10 @@
             android:icon="@drawable/ic_dashboard"
             android:title="@string/dashboard" />
         <item
+            android:id="@+id/nav_version_manager"
+            android:icon="@drawable/ic_swap_horiz"
+            android:title="@string/version_manager" />
+        <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings"
             android:title="@string/settings" />

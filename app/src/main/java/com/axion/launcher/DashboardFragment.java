@@ -33,6 +33,15 @@ public class DashboardFragment extends Fragment {
                 launchMinecraftPE();
             }
         });
+        
+        // Make version card clickable to navigate to version manager
+        View versionCard = view.findViewById(R.id.version_card);
+        versionCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigateToVersionManager();
+            }
+        });
     }
     
     private void launchMinecraftPE() {
@@ -45,6 +54,19 @@ public class DashboardFragment extends Fragment {
             startActivity(intent);
         } catch (Exception e) {
             Toast.makeText(requireContext(), "Error launching Minecraft PE", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void navigateToVersionManager() {
+        // Update navigation drawer to show version manager
+        if (getActivity() instanceof MainActivity) {
+            MainActivity activity = (MainActivity) getActivity();
+            activity.getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new VersionManagerFragment())
+                    .commit();
+            
+            // Update navigation drawer selection
+            activity.updateNavigationSelection(R.id.nav_version_manager);
         }
     }
 }
