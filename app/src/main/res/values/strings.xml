@@ -10,6 +10,7 @@
     <string name="information">Information</string>
     
     <!-- Dashboard -->
+    <string name="welcome_message">Welcome to Axion</string>
     <string name="selected_version">Selected Version</string>
     <string name="version_info">Version: 1.21.72.01 - 972107201 Type: Release</string>
     <string name="status_installed">Status: Installed</string>
