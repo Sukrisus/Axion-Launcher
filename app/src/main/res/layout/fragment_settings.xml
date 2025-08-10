@@ -60,6 +60,7 @@
                     android:textColor="@color/text_on_surface" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/theme_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/dark_mode"

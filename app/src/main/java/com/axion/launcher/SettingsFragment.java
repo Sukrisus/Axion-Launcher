@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
 
@@ -30,6 +31,17 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 deleteMinecraftPE();
+            }
+        });
+        
+        SwitchMaterial themeSwitch = view.findViewById(R.id.theme_switch);
+        ThemeManager themeManager = ThemeManager.getInstance(requireContext());
+        themeSwitch.setChecked(themeManager.isDarkMode());
+        
+        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.toggleTheme();
             }
         });
     }

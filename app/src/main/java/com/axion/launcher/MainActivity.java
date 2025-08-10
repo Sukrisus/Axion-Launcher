@@ -2,6 +2,7 @@ package com.axion.launcher;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -18,10 +19,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private MCPEVersion selectedVersion;
+    private ThemeManager themeManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Initialize theme manager and apply saved theme
+        themeManager = ThemeManager.getInstance(this);
+        themeManager.setThemeMode(themeManager.getCurrentThemeMode());
+        
         setContentView(R.layout.activity_main);
 
         // Initialize views
@@ -101,5 +108,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     
     public MCPEVersion getSelectedVersion() {
         return selectedVersion;
+    }
+    
+    public void toggleTheme() {
+        View rootView = findViewById(android.R.id.content);
+        themeManager.toggleTheme(this, rootView);
     }
 }

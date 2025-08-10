@@ -40,8 +40,8 @@
         <!-- Status bar and Navigation bar -->
         <item name="android:statusBarColor">@color/surface_dim</item>
         <item name="android:navigationBarColor">@color/surface_dim</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         
         <!-- Material You 3 Typography -->
         <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Material3.HeadlineLarge</item>
