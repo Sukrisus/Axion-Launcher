@@ -37,13 +37,12 @@ public class DashboardFragment extends Fragment {
     
     private void launchMinecraftPE() {
         try {
-            Intent intent = requireActivity().getPackageManager().getLaunchIntentForPackage("com.mojang.minecraftpe");
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            } else {
-                Toast.makeText(requireContext(), "Minecraft PE not found", Toast.LENGTH_SHORT).show();
-            }
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setClassName("com.mojang.minecraftpe", "com.mojang.minecraftpe.MainActivity");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         } catch (Exception e) {
             Toast.makeText(requireContext(), "Error launching Minecraft PE", Toast.LENGTH_SHORT).show();
         }
