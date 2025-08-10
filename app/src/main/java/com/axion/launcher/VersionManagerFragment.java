@@ -161,13 +161,23 @@ public class VersionManagerFragment extends Fragment {
             // For demo purposes, let's assume version 1.21.100.6 is installed
             // In a real app, you'd get this from the package info
             String installedVersion = "1.21.100.6";
+            System.out.println("Checking for installed version: " + installedVersion);
             
+            boolean foundMatch = false;
             for (MCPEVersion version : allVersions) {
-                if (isVersionMatch(installedVersion, version.getVersionNumber())) {
+                boolean matches = isVersionMatch(installedVersion, version.getVersionNumber());
+                System.out.println("Checking " + version.getVersionNumber() + " against " + installedVersion + " = " + matches);
+                
+                if (matches) {
                     version.setInstalled(true);
-                    System.out.println("Marked version " + version.getVersionNumber() + " as installed (matches " + installedVersion + ")");
+                    foundMatch = true;
+                    System.out.println("✓ Marked version " + version.getVersionNumber() + " as installed (matches " + installedVersion + ")");
                     break;
                 }
+            }
+            
+            if (!foundMatch) {
+                System.out.println("❌ No matching version found for " + installedVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
             // Minecraft PE is not installed
@@ -183,14 +193,20 @@ public class VersionManagerFragment extends Fragment {
         String[] installedParts = installedVersion.split("\\.");
         String[] launcherParts = launcherVersion.split("\\.");
         
+        System.out.println("  Comparing: " + installedVersion + " vs " + launcherVersion);
+        System.out.println("  Installed parts: " + java.util.Arrays.toString(installedParts));
+        System.out.println("  Launcher parts: " + java.util.Arrays.toString(launcherParts));
+        
         // If launcher version has more parts than installed, it can't match
         if (launcherParts.length > installedParts.length) {
+            System.out.println("  ❌ Launcher has more parts than installed");
             return false;
         }
         
         // Check if all parts of the launcher version match the installed version
         for (int i = 0; i < launcherParts.length; i++) {
             if (i >= installedParts.length) {
+                System.out.println("  ❌ Index " + i + " out of bounds for installed parts");
                 return false;
             }
             
@@ -198,17 +214,23 @@ public class VersionManagerFragment extends Fragment {
                 int installedPart = Integer.parseInt(installedParts[i]);
                 int launcherPart = Integer.parseInt(launcherParts[i]);
                 
+                System.out.println("  Comparing part " + i + ": " + installedPart + " vs " + launcherPart);
+                
                 if (installedPart != launcherPart) {
+                    System.out.println("  ❌ Parts don't match at index " + i);
                     return false;
                 }
             } catch (NumberFormatException e) {
                 // If parsing fails, do exact string comparison
+                System.out.println("  Comparing strings at index " + i + ": " + installedParts[i] + " vs " + launcherParts[i]);
                 if (!installedParts[i].equals(launcherParts[i])) {
+                    System.out.println("  ❌ String parts don't match at index " + i);
                     return false;
                 }
             }
         }
         
+        System.out.println("  ✅ All parts match!");
         return true;
     }
     

@@ -40,11 +40,17 @@ public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionV
         MCPEVersion version = versions.get(position);
         holder.bind(version);
         
-        // Add animation
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(
-                holder.itemView.getContext(), 
-                android.R.anim.fade_in
-        ));
+        // Add staggered slide-in-left animation
+        holder.itemView.setAlpha(0f);
+        holder.itemView.setTranslationX(-100f);
+        
+        holder.itemView.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(300)
+                .setStartDelay(position * 50) // Staggered delay
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
     }
 
     @Override
