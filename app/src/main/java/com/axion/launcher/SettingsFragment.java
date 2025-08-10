@@ -44,6 +44,15 @@ public class SettingsFragment extends Fragment {
                 activity.toggleTheme();
             }
         });
+        
+        // Set up appearance card click
+        View appearanceCard = view.findViewById(R.id.appearance_card);
+        appearanceCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigateToAppearance();
+            }
+        });
     }
     
     private void deleteMinecraftPE() {
@@ -53,6 +62,16 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         } catch (Exception e) {
             Toast.makeText(requireContext(), "Error deleting Minecraft PE", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void navigateToAppearance() {
+        if (getActivity() instanceof MainActivity) {
+            MainActivity activity = (MainActivity) getActivity();
+            activity.getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new AppearanceFragment())
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 }
