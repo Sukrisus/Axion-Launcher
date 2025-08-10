@@ -1,0 +1,8 @@
+# This file ensures proper permissions for GitHub Actions
+# It's automatically applied to all workflows in this repository
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: read

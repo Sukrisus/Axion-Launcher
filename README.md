@@ -1,5 +1,9 @@
 # Axion Launcher
 
+[![Android Build](https://github.com/yourusername/axion-launcher/workflows/Android%20Build/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
+[![Test Build](https://github.com/yourusername/axion-launcher/workflows/Test%20Build/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
+[![Code Quality](https://github.com/yourusername/axion-launcher/workflows/Code%20Quality/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
+
 A simple and clean Android launcher for Minecraft PE with Material Design UI.
 
 ## Features
@@ -26,9 +30,20 @@ The app features a clean interface with:
 
 ## Installation
 
+### Option 1: Build from Source
 1. Clone this repository
 2. Open the project in Android Studio
 3. Build and run the app on your device
+
+### Option 2: Download from GitHub Actions
+1. Go to the [Actions](https://github.com/yourusername/axion-launcher/actions) tab
+2. Download the latest APK from the "Test Build" workflow
+3. Install the APK on your Android device
+
+### Option 3: Release Downloads
+1. Go to the [Releases](https://github.com/yourusername/axion-launcher/releases) page
+2. Download the latest release APK
+3. Install the APK on your Android device
 
 ## Usage
 
@@ -63,6 +78,53 @@ app/
 - Material Design Components
 - Navigation Components
 - ConstraintLayout
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+### Workflows
+
+1. **Android Build** (`android-build.yml`)
+   - Triggers on push to main/master and pull requests
+   - Builds the project and runs tests
+   - Creates release APK artifacts
+   - Uploads build reports and test results
+
+2. **Release** (`release.yml`)
+   - Triggers when a new tag is pushed (e.g., `v1.0.0`)
+   - Creates a GitHub release with the APK attached
+   - Automatically generates release notes
+
+3. **Code Quality** (`code-quality.yml`)
+   - Runs Android Lint for code quality checks
+   - Performs security analysis with OWASP Dependency Check
+   - Uploads lint and security reports
+
+4. **Test Build** (`test-build.yml`)
+   - Manual trigger or on push to main/master
+   - Validates the build process
+   - Creates debug APK for testing
+
+### Building Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/axion-launcher.git
+cd axion-launcher
+
+# Build the project
+./gradlew build
+
+# Run tests
+./gradlew test
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK
+./gradlew assembleRelease
+```
 
 ## License
 
