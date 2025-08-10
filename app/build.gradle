@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 30
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.axion.launcher"
         minSdk 21
-        targetSdk 30
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -39,6 +39,14 @@ android {
         unitTests {
             includeAndroidResources = true
         }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.10'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10'
     }
 }
 
