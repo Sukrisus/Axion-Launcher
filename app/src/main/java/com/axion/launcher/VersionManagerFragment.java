@@ -103,6 +103,12 @@ public class VersionManagerFragment extends Fragment {
         // Check which version is installed
         checkInstalledVersion();
         
+        // Debug: Print loaded versions
+        System.out.println("Loaded " + allVersions.size() + " versions");
+        for (MCPEVersion version : allVersions) {
+            System.out.println("Version: " + version.getVersionNumber() + " - " + version.getFilterType());
+        }
+        
         filterVersions();
     }
     
@@ -132,10 +138,17 @@ public class VersionManagerFragment extends Fragment {
     private void filterVersions() {
         List<MCPEVersion> filteredVersions = new ArrayList<>();
         for (MCPEVersion version : allVersions) {
-            if (version.getType().equals(currentFilter)) {
+            if (version.getFilterType().equals(currentFilter)) {
                 filteredVersions.add(version);
             }
         }
+        
+        // Debug: Print filtered versions
+        System.out.println("Filter: " + currentFilter + " - Found " + filteredVersions.size() + " versions");
+        for (MCPEVersion version : filteredVersions) {
+            System.out.println("Filtered: " + version.getVersionNumber());
+        }
+        
         versionAdapter.updateVersions(filteredVersions);
     }
     

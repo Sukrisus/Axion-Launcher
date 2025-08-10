@@ -54,6 +54,7 @@ public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionV
 
     public void updateVersions(List<MCPEVersion> newVersions) {
         this.versions = newVersions;
+        System.out.println("Adapter: Updating with " + newVersions.size() + " versions");
         notifyDataSetChanged();
     }
 
