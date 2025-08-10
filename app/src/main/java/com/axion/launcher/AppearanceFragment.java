@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -37,7 +39,6 @@ import java.io.InputStream;
 
 public class AppearanceFragment extends Fragment {
 
-    private static final int PICK_IMAGE_REQUEST = 1;
     private static final int PERMISSION_REQUEST_CODE = 2;
     
     private ImageView appIcon;
@@ -45,6 +46,9 @@ public class AppearanceFragment extends Fragment {
     private MaterialButton changeAppearanceButton;
     private Bitmap selectedIcon;
     private String selectedIconPath;
+    
+    private ActivityResultLauncher<String> imagePickerLauncher;
+    private ActivityResultLauncher<String> permissionLauncher;
 
     @Nullable
     @Override
@@ -61,6 +65,23 @@ public class AppearanceFragment extends Fragment {
         changeAppearanceButton = view.findViewById(R.id.change_appearance_button);
         MaterialCardView iconContainer = view.findViewById(R.id.icon_container);
         
+        // Register activity result launchers
+        imagePickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            this::handleImageResult
+        );
+        
+        permissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (isGranted) {
+                    openImagePicker();
+                } else {
+                    Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        );
+        
         // Set up icon selection
         iconContainer.setOnClickListener(v -> selectImage());
         
@@ -71,42 +92,33 @@ public class AppearanceFragment extends Fragment {
     private void selectImage() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) 
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(), 
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 
-                    PERMISSION_REQUEST_CODE);
+            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
         } else {
             openImagePicker();
         }
     }
     
     private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        imagePickerLauncher.launch("image/*");
     }
     
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            Uri imageUri = data.getData();
-            if (imageUri != null) {
-                try {
-                    InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
-                    selectedIcon = BitmapFactory.decodeStream(inputStream);
-                    
-                    // Resize to 512x512 for app icon
-                    selectedIcon = Bitmap.createScaledBitmap(selectedIcon, 512, 512, true);
-                    
-                    appIcon.setImageBitmap(selectedIcon);
-                    appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    
-                    // Save icon to internal storage
-                    saveIconToInternalStorage(selectedIcon);
-                    
-                } catch (Exception e) {
-                    Toast.makeText(requireContext(), "Error loading image", Toast.LENGTH_SHORT).show();
-                }
+    private void handleImageResult(Uri imageUri) {
+        if (imageUri != null) {
+            try {
+                InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+                selectedIcon = BitmapFactory.decodeStream(inputStream);
+                
+                // Resize to 512x512 for app icon
+                selectedIcon = Bitmap.createScaledBitmap(selectedIcon, 512, 512, true);
+                
+                appIcon.setImageBitmap(selectedIcon);
+                appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                
+                // Save icon to internal storage
+                saveIconToInternalStorage(selectedIcon);
+                
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), "Error loading image", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -197,16 +209,4 @@ public class AppearanceFragment extends Fragment {
         });
     }
     
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openImagePicker();
-            } else {
-                Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 }
