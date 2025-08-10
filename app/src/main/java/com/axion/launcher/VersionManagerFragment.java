@@ -158,14 +158,14 @@ public class VersionManagerFragment extends Fragment {
             // Check if Minecraft PE is installed
             pm.getPackageInfo(packageName, 0);
             
-            // For demo purposes, let's assume version 1.21.100 is installed
+            // For demo purposes, let's assume version 1.21.100.6 is installed
             // In a real app, you'd get this from the package info
-            String installedVersion = "1.21.100";
+            String installedVersion = "1.21.100.6";
             
             for (MCPEVersion version : allVersions) {
-                if (version.getVersionNumber().equals(installedVersion)) {
+                if (isVersionMatch(installedVersion, version.getVersionNumber())) {
                     version.setInstalled(true);
-                    System.out.println("Marked version " + installedVersion + " as installed");
+                    System.out.println("Marked version " + version.getVersionNumber() + " as installed (matches " + installedVersion + ")");
                     break;
                 }
             }
@@ -173,6 +173,43 @@ public class VersionManagerFragment extends Fragment {
             // Minecraft PE is not installed
             System.out.println("Minecraft PE is not installed");
         }
+    }
+    
+    /**
+     * Check if two version numbers match, ignoring the last part if it's different
+     * e.g., "1.21.100.6" matches "1.21.100"
+     */
+    private boolean isVersionMatch(String installedVersion, String launcherVersion) {
+        String[] installedParts = installedVersion.split("\\.");
+        String[] launcherParts = launcherVersion.split("\\.");
+        
+        // If launcher version has more parts than installed, it can't match
+        if (launcherParts.length > installedParts.length) {
+            return false;
+        }
+        
+        // Check if all parts of the launcher version match the installed version
+        for (int i = 0; i < launcherParts.length; i++) {
+            if (i >= installedParts.length) {
+                return false;
+            }
+            
+            try {
+                int installedPart = Integer.parseInt(installedParts[i]);
+                int launcherPart = Integer.parseInt(launcherParts[i]);
+                
+                if (installedPart != launcherPart) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                // If parsing fails, do exact string comparison
+                if (!installedParts[i].equals(launcherParts[i])) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     }
     
     private void filterVersions() {
