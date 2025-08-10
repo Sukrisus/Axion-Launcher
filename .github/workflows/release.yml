@@ -39,13 +39,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
           
-    - name: Build signed APK
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+      
+    - name: Build Release APK
       run: ./gradlew assembleRelease
       
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: app/build/outputs/apk/release/app-release.apk
+        files: |
+          app/build/outputs/apk/debug/app-debug.apk
+          app/build/outputs/apk/release/app-release-unsigned.apk
         draft: false
         prerelease: false
         generate_release_notes: true
