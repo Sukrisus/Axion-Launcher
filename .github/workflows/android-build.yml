@@ -23,6 +23,12 @@ jobs:
         distribution: 'temurin'
         cache: gradle
         
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        sdk-platform: '30'
+        sdk-build-tools: '30.0.3'
+        
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
@@ -40,16 +46,13 @@ jobs:
       run: ./validate-build.sh
       
     - name: Build with Gradle
-      run: ./gradlew build || echo "Build failed due to missing SDK - this is expected in CI environment"
-      continue-on-error: true
+      run: ./gradlew build
       
     - name: Run tests
-      run: ./gradlew test || echo "Tests failed due to missing SDK - this is expected in CI environment"
-      continue-on-error: true
+      run: ./gradlew test
       
     - name: Build APK
-      run: ./gradlew assembleRelease || echo "APK build failed due to missing SDK - this is expected in CI environment"
-      continue-on-error: true
+      run: ./gradlew assembleRelease
       
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
