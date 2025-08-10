@@ -1,0 +1,59 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Material You 3 Base application theme -->
+    <style name="Theme.AxionLauncher" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Material You 3 Color Attributes -->
+        <item name="colorPrimary">@color/primary_color</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_light</item>
+        <item name="colorOnPrimaryContainer">@color/text_on_primary</item>
+        
+        <item name="colorSecondary">@color/accent_color</item>
+        <item name="colorOnSecondary">@color/text_on_surface</item>
+        <item name="colorSecondaryContainer">@color/surface_variant</item>
+        <item name="colorOnSecondaryContainer">@color/text_on_surface</item>
+        
+        <item name="colorTertiary">@color/primary_dark</item>
+        <item name="colorOnTertiary">@color/text_on_primary</item>
+        <item name="colorTertiaryContainer">@color/primary_light</item>
+        <item name="colorOnTertiaryContainer">@color/text_on_primary</item>
+        
+        <!-- Material You 3 Surface Colors -->
+        <item name="colorSurface">@color/surface_color</item>
+        <item name="colorOnSurface">@color/text_on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/secondary_text_color</item>
+        
+        <!-- Material You 3 Background Colors -->
+        <item name="android:colorBackground">@color/background_color</item>
+        <item name="colorOnBackground">@color/text_on_surface</item>
+        
+        <!-- Material You 3 Outline Colors -->
+        <item name="colorOutline">@color/outline_color</item>
+        <item name="colorOutlineVariant">@color/outline_variant</item>
+        
+        <!-- Material You 3 Error Colors -->
+        <item name="colorError">@color/error_color</item>
+        <item name="colorOnError">@color/text_on_surface</item>
+        <item name="colorErrorContainer">@color/surface_variant</item>
+        <item name="colorOnErrorContainer">@color/error_color</item>
+        
+        <!-- Status bar and Navigation bar -->
+        <item name="android:statusBarColor">@color/surface_dim</item>
+        <item name="android:navigationBarColor">@color/surface_dim</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        
+        <!-- Material You 3 Typography -->
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Material3.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Material3.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Material3.HeadlineSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Material3.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Material3.BodySmall</item>
+        
+        <!-- Material You 3 Shape -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Material3.SmallComponent</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Material3.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Material3.LargeComponent</item>
+    </style>
+</resources>

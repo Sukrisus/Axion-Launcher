@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Axion Launcher</string>
+    <string name="app_tagline">Minecraft PE Launcher</string>
+    
+    <!-- Navigation -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="version_manager">Version Manager</string>
+    <string name="settings">Settings</string>
+    <string name="information">Information</string>
+    
+    <!-- Dashboard -->
+    <string name="welcome_message">Welcome to Axion</string>
+    <string name="selected_version">Selected Version</string>
+    <string name="version_info">Version: 1.21.72.01 - 972107201 Type: Release</string>
+    <string name="status_installed">Status: Installed</string>
+    <string name="launch">Launch</string>
+    <string name="logs">Logs:</string>
+    <string name="logs_placeholder">No logs available</string>
+    
+    <!-- Settings -->
+    <string name="general_settings">General Settings</string>
+    <string name="auto_launch">Auto Launch</string>
+    <string name="notifications">Notifications</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="about">About</string>
+    <string name="app_version">App Version: 1.0.0</string>
+    <string name="developer_info">Developer: Axion Team</string>
+    
+    <!-- Info -->
+    <string name="app_description">App Description</string>
+    <string name="description_text">Axion Launcher is a simple and clean launcher for Minecraft PE. It provides an easy way to launch Minecraft PE with a beautiful Material Design interface.</string>
+    <string name="features">Features</string>
+    <string name="feature_1">• Clean Material Design UI</string>
+    <string name="feature_2">• One-click Minecraft PE launch</string>
+    <string name="feature_3">• Navigation drawer with multiple sections</string>
+    <string name="contact">Contact</string>
+    <string name="email_contact">Email: support@axionlauncher.com</string>
+    <string name="website_contact">Website: www.axionlauncher.com</string>
+</resources>
