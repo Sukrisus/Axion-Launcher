@@ -85,6 +85,9 @@ public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionV
                 actionButton.setBackgroundTintList(itemView.getContext().getColorStateList(R.color.primary_color));
                 actionButton.setOnClickListener(v -> actionListener.onVersionAction(version, "download"));
             }
+            
+            // Make the entire card clickable for version selection
+            itemView.setOnClickListener(v -> actionListener.onVersionAction(version, "select"));
         }
     }
 }

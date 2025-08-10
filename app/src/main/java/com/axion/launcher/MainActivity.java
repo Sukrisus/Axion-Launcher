@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private MCPEVersion selectedVersion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,5 +91,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     
     public void updateNavigationSelection(int menuItemId) {
         navigationView.setCheckedItem(menuItemId);
+    }
+    
+    public void setSelectedVersion(MCPEVersion version) {
+        this.selectedVersion = version;
+    }
+    
+    public MCPEVersion getSelectedVersion() {
+        return selectedVersion;
     }
 }

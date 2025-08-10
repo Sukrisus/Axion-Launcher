@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,9 @@ public class DashboardFragment extends Fragment {
                 navigateToVersionManager();
             }
         });
+        
+        // Update version display
+        updateVersionDisplay();
     }
     
     private void launchMinecraftPE() {
@@ -67,6 +71,20 @@ public class DashboardFragment extends Fragment {
             
             // Update navigation drawer selection
             activity.updateNavigationSelection(R.id.nav_version_manager);
+        }
+    }
+    
+    private void updateVersionDisplay() {
+        if (getActivity() instanceof MainActivity) {
+            MainActivity activity = (MainActivity) getActivity();
+            MCPEVersion selectedVersion = activity.getSelectedVersion();
+            
+            if (selectedVersion != null) {
+                TextView versionInfo = getView().findViewById(R.id.version_info);
+                if (versionInfo != null) {
+                    versionInfo.setText("Version: " + selectedVersion.getVersionNumber() + " - " + selectedVersion.getType());
+                }
+            }
         }
     }
 }

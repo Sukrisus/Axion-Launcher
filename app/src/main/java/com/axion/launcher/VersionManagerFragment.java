@@ -73,6 +73,9 @@ public class VersionManagerFragment extends Fragment {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
+        
+        // Set initial tab
+        tabLayout.selectTab(tabLayout.getTabAt(0));
     }
     
     private void setupRecyclerView() {
@@ -145,6 +148,19 @@ public class VersionManagerFragment extends Fragment {
             // Here you would implement actual deletion logic
             version.setInstalled(false);
             filterVersions();
+        } else if ("select".equals(action)) {
+            // Update the selected version in the dashboard
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setSelectedVersion(version);
+                Toast.makeText(requireContext(), "Selected " + version.getVersionNumber(), Toast.LENGTH_SHORT).show();
+                
+                // Navigate back to dashboard
+                activity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new DashboardFragment())
+                        .commit();
+                activity.updateNavigationSelection(R.id.nav_dashboard);
+            }
         }
     }
 }
