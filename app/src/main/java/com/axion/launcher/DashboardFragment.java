@@ -1,13 +1,18 @@
 package com.axion.launcher;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.material.button.MaterialButton;
 
 public class DashboardFragment extends Fragment {
 
@@ -20,5 +25,27 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        MaterialButton launchButton = view.findViewById(R.id.launch_button);
+        launchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchMinecraftPE();
+            }
+        });
+    }
+    
+    private void launchMinecraftPE() {
+        try {
+            Intent intent = requireActivity().getPackageManager().getLaunchIntentForPackage("com.mojang.minecraftpe");
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), "Minecraft PE not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error launching Minecraft PE", Toast.LENGTH_SHORT).show();
+        }
     }
 }

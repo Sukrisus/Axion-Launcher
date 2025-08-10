@@ -1,11 +1,7 @@
 package com.axion.launcher;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -15,14 +11,12 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private MaterialButton launchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +26,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize views
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
-        launchButton = findViewById(R.id.launch_button);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         // Setup toolbar
@@ -46,14 +39,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Setup launch button
-        launchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchMinecraftPE();
-            }
-        });
-
         // Set default fragment
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -63,19 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void launchMinecraftPE() {
-        try {
-            Intent intent = getPackageManager().getLaunchIntentForPackage("com.mojang.minecraftpe");
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Minecraft PE not found", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "Error launching Minecraft PE", Toast.LENGTH_SHORT).show();
-        }
-    }
+
 
     @Override
     public void onBackPressed() {
