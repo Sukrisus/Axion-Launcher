@@ -158,18 +158,20 @@ public class VersionManagerFragment extends Fragment {
             // Check if Minecraft PE is installed
             pm.getPackageInfo(packageName, 0);
             
-            // For demo purposes, let's assume version 1.21.72 is installed
+            // For demo purposes, let's assume version 1.21.100 is installed
             // In a real app, you'd get this from the package info
-            String installedVersion = "1.21.72";
+            String installedVersion = "1.21.100";
             
             for (MCPEVersion version : allVersions) {
                 if (version.getVersionNumber().equals(installedVersion)) {
                     version.setInstalled(true);
+                    System.out.println("Marked version " + installedVersion + " as installed");
                     break;
                 }
             }
         } catch (PackageManager.NameNotFoundException e) {
             // Minecraft PE is not installed
+            System.out.println("Minecraft PE is not installed");
         }
     }
     
@@ -181,10 +183,28 @@ public class VersionManagerFragment extends Fragment {
             }
         }
         
-        // Debug: Print filtered versions
+        // Sort versions in ascending order (latest to oldest)
+        filteredVersions.sort((v1, v2) -> {
+            String[] parts1 = v1.getVersionNumber().split("\\.");
+            String[] parts2 = v2.getVersionNumber().split("\\.");
+            
+            int maxLength = Math.max(parts1.length, parts2.length);
+            
+            for (int i = 0; i < maxLength; i++) {
+                int num1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
+                int num2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+                
+                if (num1 != num2) {
+                    return Integer.compare(num1, num2);
+                }
+            }
+            return 0;
+        });
+        
+        // Debug: Print filtered and sorted versions
         System.out.println("Filter: " + currentFilter + " - Found " + filteredVersions.size() + " versions");
         for (MCPEVersion version : filteredVersions) {
-            System.out.println("Filtered: " + version.getVersionNumber());
+            System.out.println("Filtered & Sorted: " + version.getVersionNumber() + " (Installed: " + version.isInstalled() + ")");
         }
         
         versionAdapter.updateVersions(filteredVersions);
