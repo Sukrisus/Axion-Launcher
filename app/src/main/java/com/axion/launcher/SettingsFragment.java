@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.button.MaterialButton;
+import android.widget.ImageView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
@@ -26,7 +26,7 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        MaterialButton deleteButton = view.findViewById(R.id.delete_mcpe_button);
+        ImageView deleteButton = view.findViewById(R.id.delete_mcpe_button);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
