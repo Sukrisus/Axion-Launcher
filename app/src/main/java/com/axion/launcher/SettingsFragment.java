@@ -1,13 +1,17 @@
 package com.axion.launcher;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.material.button.MaterialButton;
 
 public class SettingsFragment extends Fragment {
 
@@ -20,5 +24,23 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        MaterialButton deleteButton = view.findViewById(R.id.delete_mcpe_button);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteMinecraftPE();
+            }
+        });
+    }
+    
+    private void deleteMinecraftPE() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_DELETE);
+            intent.setData(android.net.Uri.parse("package:com.mojang.minecraftpe"));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error deleting Minecraft PE", Toast.LENGTH_SHORT).show();
+        }
     }
 }

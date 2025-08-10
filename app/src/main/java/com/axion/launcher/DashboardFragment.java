@@ -35,6 +35,14 @@ public class DashboardFragment extends Fragment {
             }
         });
         
+        MaterialButton deleteButton = view.findViewById(R.id.delete_button);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteMinecraftPE();
+            }
+        });
+        
         // Make version card clickable to navigate to version manager
         View versionCard = view.findViewById(R.id.version_card);
         versionCard.setOnClickListener(new View.OnClickListener() {
@@ -58,6 +66,16 @@ public class DashboardFragment extends Fragment {
             startActivity(intent);
         } catch (Exception e) {
             Toast.makeText(requireContext(), "Error launching Minecraft PE", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void deleteMinecraftPE() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_DELETE);
+            intent.setData(android.net.Uri.parse("package:com.mojang.minecraftpe"));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error deleting Minecraft PE", Toast.LENGTH_SHORT).show();
         }
     }
     

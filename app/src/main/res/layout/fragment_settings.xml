@@ -73,6 +73,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
             app:cardBackgroundColor="@color/card_background"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
@@ -111,6 +112,22 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <!-- Delete MCPE Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/delete_mcpe_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Delete Minecraft PE"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            android:textColor="@color/text_on_surface"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_delete"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconSize="24dp"
+            app:iconTint="@color/text_on_surface"
+            app:backgroundTint="@color/error_color" />
 
     </LinearLayout>
 

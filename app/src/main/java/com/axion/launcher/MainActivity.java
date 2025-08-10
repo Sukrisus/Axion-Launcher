@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Setup toolbar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Axion Launcher");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.secondary_text_color));
+        toolbar.setTitleTextColor(getResources().getColor(R.color.black));
 
         // Setup navigation drawer
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
