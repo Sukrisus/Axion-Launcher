@@ -1,41 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material You 3 Color Palette - Lavender/Dark Theme -->
-    <color name="primary_color">#D0BCFF</color>
-    <color name="primary_dark">#B69DF8</color>
+    <!-- Premium Material You 3 Color Palette - Deep Purple/Dark Theme -->
+    <color name="primary_color">#B69DF8</color>
+    <color name="primary_dark">#9A82DB</color>
     <color name="primary_light">#E8DEF8</color>
-    <color name="accent_color">#CAC4D0</color>
+    <color name="accent_color">#FFB4AB</color>
     
-    <!-- Material You 3 Surface Colors -->
-    <color name="surface_color">#1C1B1F</color>
-    <color name="surface_variant">#49454F</color>
-    <color name="surface_bright">#2B2930</color>
-    <color name="surface_dim">#141218</color>
+    <!-- Premium Surface Colors -->
+    <color name="surface_color">#1A1B1E</color>
+    <color name="surface_variant">#2F3033</color>
+    <color name="surface_bright">#3A3B3E</color>
+    <color name="surface_dim">#0F1012</color>
     
-    <!-- Material You 3 Text Colors -->
-    <color name="primary_text_color">#E6E1E5</color>
-    <color name="secondary_text_color">#CAC4D0</color>
-    <color name="tertiary_text_color">#938F99</color>
-    <color name="text_on_primary">#381E72</color>
-    <color name="text_on_surface">#E6E1E5</color>
+    <!-- Premium Text Colors -->
+    <color name="primary_text_color">#F5F5F5</color>
+    <color name="secondary_text_color">#B8B8B8</color>
+    <color name="tertiary_text_color">#8A8A8A</color>
+    <color name="text_on_primary">#1A1B1E</color>
+    <color name="text_on_surface">#F5F5F5</color>
     
-    <!-- Material You 3 Background Colors -->
-    <color name="background_color">#141218</color>
-    <color name="card_background">#1C1B1F</color>
-    <color name="card_background_variant">#2B2930</color>
+    <!-- Premium Background Colors -->
+    <color name="background_color">#0F1012</color>
+    <color name="card_background">#1A1B1E</color>
+    <color name="card_background_variant">#2F3033</color>
+    <color name="card_background_elevated">#3A3B3E</color>
     
-    <!-- Material You 3 Status Colors -->
-    <color name="success_color">#9CCC65</color>
-    <color name="error_color">#F2B8B5</color>
-    <color name="warning_color">#FDDC22</color>
+    <!-- Premium Status Colors -->
+    <color name="success_color">#A8E6CF</color>
+    <color name="error_color">#FF8A80</color>
+    <color name="warning_color">#FFD54F</color>
     
-    <!-- Material You 3 Outline Colors -->
-    <color name="outline_color">#938F99</color>
-    <color name="outline_variant">#49454F</color>
+    <!-- Premium Outline Colors -->
+    <color name="outline_color">#4A4A4A</color>
+    <color name="outline_variant">#2F3033</color>
     
-    <!-- Material You 3 State Colors -->
-    <color name="state_layer_primary">#D0BCFF</color>
-    <color name="state_layer_surface">#E6E1E5</color>
+    <!-- Premium State Colors -->
+    <color name="state_layer_primary">#B69DF8</color>
+    <color name="state_layer_surface">#F5F5F5</color>
+    
+    <!-- Premium Gradients -->
+    <color name="gradient_start">#B69DF8</color>
+    <color name="gradient_end">#9A82DB</color>
+    <color name="gradient_accent_start">#FFB4AB</color>
+    <color name="gradient_accent_end">#FF8A80</color>
     
     <!-- Status Bar -->
     <color name="status_bar_color">@color/surface_dim</color>

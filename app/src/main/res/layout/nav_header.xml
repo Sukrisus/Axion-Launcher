@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:background="@color/surface_variant"
+    android:layout_height="220dp"
+    android:background="@drawable/premium_gradient_background"
     android:gravity="bottom"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="28dp"
     android:theme="@style/ThemeOverlay.Material3.Dark">
 
     <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="16dp"
         android:src="@drawable/ic_launcher"
         android:contentDescription="@string/app_name"
         android:background="@drawable/circle_background"
-        android:padding="16dp" />
+        android:padding="20dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        android:textColor="@color/text_on_surface" />
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="@color/text_on_surface"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/app_tagline"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:textColor="@color/secondary_text_color" />
 
 </LinearLayout>
