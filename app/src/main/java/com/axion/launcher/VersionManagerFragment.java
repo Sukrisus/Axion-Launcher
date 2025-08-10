@@ -88,17 +88,55 @@ public class VersionManagerFragment extends Fragment {
         allVersions = new ArrayList<>();
         
         // Release versions
-        allVersions.add(new MCPEVersion("1.21.72.01", "Release", "Latest stable version", "release", false));
-        allVersions.add(new MCPEVersion("1.21.50.01", "Release", "Previous stable version", "release", false));
-        allVersions.add(new MCPEVersion("1.21.40.02", "Release", "Older stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.1", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.10", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.12", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.13", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.14", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.15", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.30", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.31", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.32", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.40", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.50", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.60", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.70", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.80", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.20.81", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.22", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.23", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.30", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.31", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.40", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.41", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.43", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.44", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.50", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.51", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.60", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.61", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.62", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.70", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.72", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.80", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.81", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.82", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.90", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.92", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.93", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.94", "Release", "Stable version", "release", false));
+        allVersions.add(new MCPEVersion("1.21.100", "Release", "Stable version", "release", false));
         
-        // Beta versions
-        allVersions.add(new MCPEVersion("1.22.0.50", "Beta", "Latest beta version", "beta", false));
-        allVersions.add(new MCPEVersion("1.22.0.40", "Beta", "Previous beta version", "beta", false));
+        // Beta versions (using some of the versions as beta)
+        allVersions.add(new MCPEVersion("1.21.110.20", "Beta", "Beta version", "beta", false));
+        allVersions.add(new MCPEVersion("1.21.110.23", "Beta", "Beta version", "beta", false));
+        allVersions.add(new MCPEVersion("1.21.110.25", "Beta", "Beta version", "beta", false));
         
-        // Preview versions
-        allVersions.add(new MCPEVersion("1.22.0.60", "Preview", "Latest preview version", "preview", false));
-        allVersions.add(new MCPEVersion("1.22.0.55", "Preview", "Previous preview version", "preview", false));
+        // Preview versions (using some newer versions as preview)
+        allVersions.add(new MCPEVersion("1.22.0.50", "Preview", "Preview version", "preview", false));
+        allVersions.add(new MCPEVersion("1.22.0.40", "Preview", "Preview version", "preview", false));
+        allVersions.add(new MCPEVersion("1.22.0.60", "Preview", "Preview version", "preview", false));
+        allVersions.add(new MCPEVersion("1.22.0.55", "Preview", "Preview version", "preview", false));
         
         // Check which version is installed
         checkInstalledVersion();
@@ -120,9 +158,9 @@ public class VersionManagerFragment extends Fragment {
             // Check if Minecraft PE is installed
             pm.getPackageInfo(packageName, 0);
             
-            // For demo purposes, let's assume version 1.21.72.01 is installed
+            // For demo purposes, let's assume version 1.21.72 is installed
             // In a real app, you'd get this from the package info
-            String installedVersion = "1.21.72.01";
+            String installedVersion = "1.21.72";
             
             for (MCPEVersion version : allVersions) {
                 if (version.getVersionNumber().equals(installedVersion)) {
