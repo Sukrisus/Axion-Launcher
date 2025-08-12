@@ -73,19 +73,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Fragment selectedFragment = null;
 
-        switch (item.getItemId()) {
-            case R.id.nav_dashboard:
-                selectedFragment = new DashboardFragment();
-                break;
-            case R.id.nav_version_manager:
-                selectedFragment = new VersionManagerFragment();
-                break;
-            case R.id.nav_settings:
-                selectedFragment = new SettingsFragment();
-                break;
-            case R.id.nav_info:
-                selectedFragment = new InfoFragment();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.nav_dashboard) {
+            selectedFragment = new DashboardFragment();
+        } else if (itemId == R.id.nav_version_manager) {
+            selectedFragment = new VersionManagerFragment();
+        } else if (itemId == R.id.nav_settings) {
+            selectedFragment = new SettingsFragment();
+        } else if (itemId == R.id.nav_info) {
+            selectedFragment = new InfoFragment();
         }
 
         if (selectedFragment != null) {
