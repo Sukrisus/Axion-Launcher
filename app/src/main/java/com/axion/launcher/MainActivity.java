@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import android.os.Environment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -180,10 +181,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             // Create target directory
-            File baseDir = new File(getExternalFilesDir(null), "resources");
+            File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
             File targetDir = new File(baseDir, targetFolder);
             if (!targetDir.exists()) {
-                targetDir.mkdirs();
+                if (!targetDir.mkdirs()) {
+                    // Fallback to app's external files directory if public storage fails
+                    File fallbackDir = new File(getExternalFilesDir(null), "resources");
+                    File fallbackTargetDir = new File(fallbackDir, targetFolder);
+                    if (!fallbackTargetDir.exists()) {
+                        fallbackTargetDir.mkdirs();
+                    }
+                    targetDir = fallbackTargetDir;
+                }
             }
 
             // Create target file

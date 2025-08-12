@@ -16,6 +16,9 @@
     <!-- Resources directory for downloaded files -->
     <external-files-path name="resources" path="resources/"/>
     
+    <!-- Public storage resources directory -->
+    <external-path name="public_resources" path="axion/files/resources/"/>
+    
     <!-- Root directory for emergency access -->
     <root-path name="root" path="."/>
 </paths>

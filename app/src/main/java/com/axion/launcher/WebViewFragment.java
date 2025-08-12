@@ -260,16 +260,18 @@ public class WebViewFragment extends Fragment {
     }
 
     private String createCustomDownloadDirectory() {
-        // Create the base directory structure in app's private external files
-        File baseDir = new File(requireContext().getExternalFilesDir(null), "resources");
+        File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
         File sectionDir = new File(baseDir, allowedSection);
         
-        // Create directories if they don't exist
         if (!sectionDir.exists()) {
             if (!sectionDir.mkdirs()) {
-                Log.e(TAG, "Failed to create directory: " + sectionDir.getAbsolutePath());
-                // Fallback to default downloads directory
-                return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+                // Fallback to app's external files directory if public storage fails
+                File fallbackDir = new File(requireContext().getExternalFilesDir(null), "resources");
+                File fallbackSectionDir = new File(fallbackDir, allowedSection);
+                if (!fallbackSectionDir.exists()) {
+                    fallbackSectionDir.mkdirs();
+                }
+                return fallbackSectionDir.getAbsolutePath();
             }
         }
         
