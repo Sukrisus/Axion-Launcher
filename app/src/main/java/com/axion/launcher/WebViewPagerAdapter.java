@@ -16,7 +16,7 @@ public class WebViewPagerAdapter extends FragmentStateAdapter {
         super(fragmentActivity);
         fragments = new ArrayList<>();
         
-        // Initialize fragments for each tab
+        // Initialize fragments for each tab with explicit section URLs
         fragments.add(WebViewFragment.newInstance("https://modbay.org/mods/", "Addons"));
         fragments.add(WebViewFragment.newInstance("https://modbay.org/textures/", "Textures"));
         fragments.add(WebViewFragment.newInstance("https://modbay.org/maps/", "Maps"));
@@ -42,5 +42,18 @@ public class WebViewPagerAdapter extends FragmentStateAdapter {
 
     public List<WebViewFragment> getAllFragments() {
         return fragments;
+    }
+
+    public String getSectionForPosition(int position) {
+        switch (position) {
+            case 0:
+                return "mods";
+            case 1:
+                return "textures";
+            case 2:
+                return "maps";
+            default:
+                return "mods";
+        }
     }
 }

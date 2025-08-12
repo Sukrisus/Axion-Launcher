@@ -28,6 +28,8 @@ import androidx.fragment.app.Fragment;
 
 public class WebViewFragment extends Fragment {
 
+    private static final String TAG = "WebViewFragment";
+    
     private WebView webView;
     private EditText urlBar;
     private ImageButton backButton;
@@ -37,6 +39,7 @@ public class WebViewFragment extends Fragment {
     
     private String initialUrl;
     private String title;
+    private String allowedSection; // "mods", "textures", or "maps"
 
     public static WebViewFragment newInstance(String url, String title) {
         WebViewFragment fragment = new WebViewFragment();
@@ -53,6 +56,17 @@ public class WebViewFragment extends Fragment {
         if (getArguments() != null) {
             initialUrl = getArguments().getString("url", "");
             title = getArguments().getString("title", "");
+            
+            // Determine the allowed section based on the initial URL
+            if (initialUrl.contains("/mods/")) {
+                allowedSection = "mods";
+            } else if (initialUrl.contains("/textures/")) {
+                allowedSection = "textures";
+            } else if (initialUrl.contains("/maps/")) {
+                allowedSection = "maps";
+            } else {
+                allowedSection = "mods"; // Default fallback
+            }
         }
     }
 
@@ -100,6 +114,15 @@ public class WebViewFragment extends Fragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
+                
+                // Check if the URL is allowed for this section
+                if (!isUrlAllowed(url)) {
+                    Log.w(TAG, "Blocked navigation to: " + url + " (not allowed in " + allowedSection + " section)");
+                    Toast.makeText(requireContext(), 
+                        "Navigation blocked: This content is not available in the " + allowedSection + " section", 
+                        Toast.LENGTH_LONG).show();
+                    return true; // Block the navigation
+                }
                 
                 // Handle different URL schemes
                 if (url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("sms:")) {
@@ -153,6 +176,29 @@ public class WebViewFragment extends Fragment {
         });
     }
 
+    private boolean isUrlAllowed(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+        
+        // Allow non-modbay.org URLs (external links)
+        if (!url.contains("modbay.org")) {
+            return true;
+        }
+        
+        // Check if URL matches the allowed section
+        switch (allowedSection) {
+            case "mods":
+                return url.contains("/mods/") || url.equals("https://modbay.org/mods/") || url.equals("https://modbay.org/mods");
+            case "textures":
+                return url.contains("/textures/") || url.equals("https://modbay.org/textures/") || url.equals("https://modbay.org/textures");
+            case "maps":
+                return url.contains("/maps/") || url.equals("https://modbay.org/maps/") || url.equals("https://modbay.org/maps");
+            default:
+                return false;
+        }
+    }
+
     private void setupNavigationControls() {
         backButton.setOnClickListener(v -> {
             if (webView.canGoBack()) {
@@ -176,6 +222,15 @@ public class WebViewFragment extends Fragment {
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
                     url = "https://" + url;
                 }
+                
+                // Check if the manually entered URL is allowed
+                if (!isUrlAllowed(url)) {
+                    Toast.makeText(requireContext(), 
+                        "This URL is not allowed in the " + allowedSection + " section. Please use the appropriate tab.", 
+                        Toast.LENGTH_LONG).show();
+                    return;
+                }
+                
                 webView.loadUrl(url);
             }
         });
@@ -186,6 +241,15 @@ public class WebViewFragment extends Fragment {
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
                     url = "https://" + url;
                 }
+                
+                // Check if the manually entered URL is allowed
+                if (!isUrlAllowed(url)) {
+                    Toast.makeText(requireContext(), 
+                        "This URL is not allowed in the " + allowedSection + " section. Please use the appropriate tab.", 
+                        Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                
                 webView.loadUrl(url);
             }
             return true;
@@ -248,8 +312,12 @@ public class WebViewFragment extends Fragment {
     }
 
     public void loadUrl(String url) {
-        if (webView != null) {
+        if (webView != null && isUrlAllowed(url)) {
             webView.loadUrl(url);
+        } else if (webView != null) {
+            Toast.makeText(requireContext(), 
+                "This URL is not allowed in the " + allowedSection + " section.", 
+                Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -259,6 +327,10 @@ public class WebViewFragment extends Fragment {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getAllowedSection() {
+        return allowedSection;
     }
 
     @Override
