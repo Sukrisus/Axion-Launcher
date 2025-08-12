@@ -87,10 +87,7 @@
             android:layout_height="8dp"
             android:layout_marginBottom="12dp"
             app:indicatorColor="@color/primary"
-            app:trackColor="@color/surface_variant"
-            app:trackCornerRadius="4dp"
-            app:indicatorCornerRadius="4dp"
-            app:trackThickness="8dp" />
+            app:trackColor="@color/surface_variant" />
 
         <!-- Action buttons -->
         <LinearLayout
