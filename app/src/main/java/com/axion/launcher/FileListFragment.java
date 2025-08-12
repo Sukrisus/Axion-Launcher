@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
@@ -30,8 +31,10 @@ public class FileListFragment extends Fragment {
     
     private RecyclerView recyclerView;
     private LinearLayout emptyState;
+    private MaterialButton universalOpenButton;
     private FileAdapter adapter;
     private String section; // "mods", "textures", or "maps"
+    private List<ResourceFile> allFiles = new ArrayList<>();
 
     public static FileListFragment newInstance(String section) {
         FileListFragment fragment = new FileListFragment();
@@ -61,8 +64,10 @@ public class FileListFragment extends Fragment {
         
         recyclerView = view.findViewById(R.id.file_recycler_view);
         emptyState = view.findViewById(R.id.empty_state);
+        universalOpenButton = view.findViewById(R.id.universal_open_button);
         
         setupRecyclerView();
+        setupUniversalOpenButton();
         loadFiles();
     }
 
@@ -72,29 +77,34 @@ public class FileListFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
+    private void setupUniversalOpenButton() {
+        universalOpenButton.setOnClickListener(v -> openAllFilesInMinecraft());
+    }
+
     private void loadFiles() {
         try {
             File baseDir = new File(requireContext().getExternalFilesDir(null), "resources");
             File sectionDir = new File(baseDir, section);
             
-            List<ResourceFile> files = new ArrayList<>();
+            allFiles = new ArrayList<>();
             
             if (sectionDir.exists() && sectionDir.isDirectory()) {
                 File[] fileArray = sectionDir.listFiles();
                 if (fileArray != null) {
                     for (File file : fileArray) {
                         if (file.isFile()) {
-                            files.add(new ResourceFile(file, section));
+                            allFiles.add(new ResourceFile(file, section));
                         }
                     }
                 }
             }
             
             // Sort files by last modified date (newest first)
-            Collections.sort(files, (f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
+            Collections.sort(allFiles, (f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
             
-            adapter.updateFiles(files);
-            updateEmptyState(files.isEmpty());
+            adapter.updateFiles(allFiles);
+            updateEmptyState(allFiles.isEmpty());
+            updateUniversalOpenButton();
             
         } catch (Exception e) {
             Log.e(TAG, "Error loading files", e);
@@ -109,6 +119,98 @@ public class FileListFragment extends Fragment {
         } else {
             recyclerView.setVisibility(View.VISIBLE);
             emptyState.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateUniversalOpenButton() {
+        boolean hasMinecraftFiles = allFiles.stream().anyMatch(ResourceFile::isMinecraftFile);
+        universalOpenButton.setEnabled(hasMinecraftFiles);
+    }
+
+    private void openAllFilesInMinecraft() {
+        List<ResourceFile> minecraftFiles = new ArrayList<>();
+        List<ResourceFile> zipFiles = new ArrayList<>();
+        
+        for (ResourceFile file : allFiles) {
+            if (file.isMinecraftFile()) {
+                if (file.needsZipRemoval()) {
+                    zipFiles.add(file);
+                } else {
+                    minecraftFiles.add(file);
+                }
+            }
+        }
+        
+        if (zipFiles.isEmpty() && minecraftFiles.isEmpty()) {
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("No Minecraft Files")
+                .setMessage("No Minecraft files found in this folder.")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+            return;
+        }
+        
+        if (!zipFiles.isEmpty()) {
+            showZipRemovalDialogForAll(zipFiles, minecraftFiles);
+        } else {
+            openFilesInMinecraft(minecraftFiles);
+        }
+    }
+
+    private void showZipRemovalDialogForAll(List<ResourceFile> zipFiles, List<ResourceFile> normalFiles) {
+        StringBuilder message = new StringBuilder();
+        message.append("Found ").append(zipFiles.size()).append(" file(s) with .zip extension.\n\n");
+        message.append("Would you like to remove the .zip extension and open all files in Minecraft PE?");
+        
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Remove .zip Extensions?")
+            .setMessage(message.toString())
+            .setPositiveButton("Proceed", (dialog, which) -> {
+                removeZipExtensionsForAll(zipFiles, normalFiles);
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+            .show();
+    }
+
+    private void removeZipExtensionsForAll(List<ResourceFile> zipFiles, List<ResourceFile> normalFiles) {
+        List<ResourceFile> allFilesToOpen = new ArrayList<>(normalFiles);
+        
+        for (ResourceFile zipFile : zipFiles) {
+            try {
+                File originalFile = zipFile.getFile();
+                String newName = originalFile.getName().replace(".zip", "");
+                File newFile = new File(originalFile.getParent(), newName);
+                
+                if (originalFile.renameTo(newFile)) {
+                    allFilesToOpen.add(new ResourceFile(newFile, section));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error removing zip extension for: " + zipFile.getName(), e);
+            }
+        }
+        
+        // Refresh the file list
+        loadFiles();
+        
+        // Open all files
+        openFilesInMinecraft(allFilesToOpen);
+    }
+
+    private void openFilesInMinecraft(List<ResourceFile> files) {
+        if (files.isEmpty()) {
+            return;
+        }
+        
+        // Open the first file, which will trigger Minecraft PE
+        openInMinecraft(files.get(0));
+        
+        // Show a message about the other files
+        if (files.size() > 1) {
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Files Opened")
+                .setMessage(files.size() + " files are being opened in Minecraft PE.")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
         }
     }
 

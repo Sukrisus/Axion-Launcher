@@ -69,14 +69,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
                            " • " + resourceFile.getFormattedSize();
             fileDetails.setText(details);
 
-            // Set button text based on file type
-            if (resourceFile.isMinecraftFile()) {
-                shareButton.setText("Open");
-                shareButton.setEnabled(true);
-            } else {
-                shareButton.setText("Unsupported");
-                shareButton.setEnabled(false);
-            }
+            // Set button enabled/disabled based on file type
+            shareButton.setEnabled(resourceFile.isMinecraftFile());
 
             shareButton.setOnClickListener(v -> {
                 if (actionListener != null) {
