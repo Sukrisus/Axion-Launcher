@@ -18,7 +18,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -26,16 +25,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
+
 public class WebViewFragment extends Fragment {
 
     private static final String TAG = "WebViewFragment";
     
     private WebView webView;
-    private EditText urlBar;
     private ImageButton backButton;
     private ImageButton forwardButton;
     private ImageButton refreshButton;
-    private ImageButton goButton;
     
     private String initialUrl;
     private String title;
@@ -81,11 +80,9 @@ public class WebViewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         
         webView = view.findViewById(R.id.webview);
-        urlBar = view.findViewById(R.id.url_bar);
         backButton = view.findViewById(R.id.back_button);
         forwardButton = view.findViewById(R.id.forward_button);
         refreshButton = view.findViewById(R.id.refresh_button);
-        goButton = view.findViewById(R.id.go_button);
         
         setupWebView();
         setupNavigationControls();
@@ -148,7 +145,6 @@ public class WebViewFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                urlBar.setText(url);
                 updateNavigationButtons();
             }
             
@@ -215,45 +211,6 @@ public class WebViewFragment extends Fragment {
         refreshButton.setOnClickListener(v -> {
             webView.reload();
         });
-        
-        goButton.setOnClickListener(v -> {
-            String url = urlBar.getText().toString().trim();
-            if (!url.isEmpty()) {
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    url = "https://" + url;
-                }
-                
-                // Check if the manually entered URL is allowed
-                if (!isUrlAllowed(url)) {
-                    Toast.makeText(requireContext(), 
-                        "This URL is not allowed in the " + allowedSection + " section. Please use the appropriate tab.", 
-                        Toast.LENGTH_LONG).show();
-                    return;
-                }
-                
-                webView.loadUrl(url);
-            }
-        });
-        
-        urlBar.setOnEditorActionListener((v, actionId, event) -> {
-            String url = urlBar.getText().toString().trim();
-            if (!url.isEmpty()) {
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    url = "https://" + url;
-                }
-                
-                // Check if the manually entered URL is allowed
-                if (!isUrlAllowed(url)) {
-                    Toast.makeText(requireContext(), 
-                        "This URL is not allowed in the " + allowedSection + " section. Please use the appropriate tab.", 
-                        Toast.LENGTH_LONG).show();
-                    return true;
-                }
-                
-                webView.loadUrl(url);
-            }
-            return true;
-        });
     }
 
     private void setupDownloadListener() {
@@ -267,32 +224,55 @@ public class WebViewFragment extends Fragment {
                     // Set headers
                     request.addRequestHeader("User-Agent", userAgent);
                     
-                    // Set destination
+                    // Create custom download directory based on section
+                    String downloadDir = createCustomDownloadDirectory();
                     String fileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+                    
+                    // Set destination to custom directory
+                    File downloadFile = new File(downloadDir, fileName);
+                    request.setDestinationUri(Uri.fromFile(downloadFile));
                     
                     // Set notification
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     request.setTitle("Downloading " + fileName);
-                    request.setDescription("Downloading file...");
+                    request.setDescription("Downloading to " + allowedSection + " folder...");
                     
                     // Start download
                     DownloadManager dm = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
                     dm.enqueue(request);
                     
-                    Toast.makeText(requireContext(), "Download started: " + fileName, Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), 
+                        "Download started: " + fileName + " to " + allowedSection + " folder", 
+                        Toast.LENGTH_LONG).show();
                     
                 } catch (Exception e) {
+                    Log.e(TAG, "Download failed", e);
                     Toast.makeText(requireContext(), "Download failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
+    private String createCustomDownloadDirectory() {
+        // Create the base directory structure
+        File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
+        File sectionDir = new File(baseDir, allowedSection);
+        
+        // Create directories if they don't exist
+        if (!sectionDir.exists()) {
+            if (!sectionDir.mkdirs()) {
+                Log.e(TAG, "Failed to create directory: " + sectionDir.getAbsolutePath());
+                // Fallback to default downloads directory
+                return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            }
+        }
+        
+        return sectionDir.getAbsolutePath();
+    }
+
     private void loadInitialUrl() {
         if (initialUrl != null && !initialUrl.isEmpty()) {
             webView.loadUrl(initialUrl);
-            urlBar.setText(initialUrl);
         }
     }
 

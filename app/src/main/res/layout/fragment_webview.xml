@@ -47,32 +47,6 @@
             android:contentDescription="Refresh"
             android:tint="@color/primary_color" />
 
-        <!-- URL Bar -->
-        <EditText
-            android:id="@+id/url_bar"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/url_bar_background"
-            android:hint="Enter URL"
-            android:paddingHorizontal="12dp"
-            android:textSize="14sp"
-            android:singleLine="true"
-            android:imeOptions="actionGo"
-            android:inputType="textUri" />
-
-        <!-- Go Button -->
-        <ImageButton
-            android:id="@+id/go_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_launch"
-            android:contentDescription="Go to URL"
-            android:tint="@color/primary_color" />
-
     </LinearLayout>
 
     <!-- WebView -->
