@@ -74,7 +74,7 @@ public class FileListFragment extends Fragment {
 
     private void loadFiles() {
         try {
-            File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
+            File baseDir = new File(requireContext().getExternalFilesDir(null), "resources");
             File sectionDir = new File(baseDir, section);
             
             List<ResourceFile> files = new ArrayList<>();

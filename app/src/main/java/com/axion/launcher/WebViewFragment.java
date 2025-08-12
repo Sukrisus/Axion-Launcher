@@ -260,8 +260,8 @@ public class WebViewFragment extends Fragment {
     }
 
     private String createCustomDownloadDirectory() {
-        // Create the base directory structure
-        File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
+        // Create the base directory structure in app's private external files
+        File baseDir = new File(requireContext().getExternalFilesDir(null), "resources");
         File sectionDir = new File(baseDir, allowedSection);
         
         // Create directories if they don't exist
