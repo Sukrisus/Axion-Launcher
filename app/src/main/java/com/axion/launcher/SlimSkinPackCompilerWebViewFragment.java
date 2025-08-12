@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
+import android.content.Intent;
 
 public class SlimSkinPackCompilerWebViewFragment extends Fragment {
 
@@ -102,19 +103,17 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
                     request.setDescription("Downloading slim skin pack file");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     
-                    // Set destination to the textures folder
-                    File downloadDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources/textures");
-                    if (!downloadDir.exists()) {
-                        downloadDir.mkdirs();
-                    }
-                    File downloadFile = new File(downloadDir, fileName);
-                    request.setDestinationUri(Uri.fromFile(downloadFile));
+                    // First download to Downloads directory (this works reliably)
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                     
                     // Start download
                     DownloadManager downloadManager = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
                     if (downloadManager != null) {
-                        downloadManager.enqueue(request);
+                        long downloadId = downloadManager.enqueue(request);
                         Toast.makeText(requireContext(), "Download started: " + fileName, Toast.LENGTH_SHORT).show();
+                        
+                        // Set up a broadcast receiver to move the file after download completes
+                        setupDownloadCompleteReceiver(downloadManager, downloadId, fileName);
                     }
                     
                 } catch (Exception e) {
@@ -123,6 +122,65 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void setupDownloadCompleteReceiver(DownloadManager dm, long downloadId, String fileName) {
+        // Create a broadcast receiver to handle download completion
+        android.content.BroadcastReceiver downloadReceiver = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (id == downloadId) {
+                    try {
+                        // Get the downloaded file from Downloads directory
+                        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                        File downloadedFile = new File(downloadsDir, fileName);
+                        
+                        if (downloadedFile.exists()) {
+                            // Create target directory
+                            File targetDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources/textures");
+                            if (!targetDir.exists()) {
+                                targetDir.mkdirs();
+                            }
+                            
+                            // Move file to target directory
+                            File targetFile = new File(targetDir, fileName);
+                            if (downloadedFile.renameTo(targetFile)) {
+                                Toast.makeText(requireContext(), "File moved to textures folder", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "File moved successfully: " + targetFile.getAbsolutePath());
+                            } else {
+                                // If rename fails, try copy
+                                java.io.FileInputStream fis = new java.io.FileInputStream(downloadedFile);
+                                java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFile);
+                                byte[] buffer = new byte[8192];
+                                int bytesRead;
+                                while ((bytesRead = fis.read(buffer)) != -1) {
+                                    fos.write(buffer, 0, bytesRead);
+                                }
+                                fis.close();
+                                fos.close();
+                                downloadedFile.delete(); // Delete original
+                                Toast.makeText(requireContext(), "File copied to textures folder", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "File copied successfully: " + targetFile.getAbsolutePath());
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error moving downloaded file", e);
+                        Toast.makeText(requireContext(), "Error moving file: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    } finally {
+                        // Unregister the receiver
+                        try {
+                            requireContext().unregisterReceiver(this);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error unregistering receiver", e);
+                        }
+                    }
+                }
+            }
+        };
+        
+        // Register the receiver
+        requireContext().registerReceiver(downloadReceiver, new android.content.IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     private String getFileNameFromUrl(String url, String contentDisposition) {
