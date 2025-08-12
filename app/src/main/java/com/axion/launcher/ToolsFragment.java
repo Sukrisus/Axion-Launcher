@@ -14,6 +14,8 @@ import com.google.android.material.button.MaterialButton;
 public class ToolsFragment extends Fragment {
 
     private MaterialButton chunkbaseButton;
+    private MaterialButton skinPackCompilerButton;
+    private MaterialButton slimSkinPackCompilerButton;
 
     @Nullable
     @Override
@@ -26,6 +28,8 @@ public class ToolsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         
         chunkbaseButton = view.findViewById(R.id.chunkbase_button);
+        skinPackCompilerButton = view.findViewById(R.id.skin_pack_compiler_button);
+        slimSkinPackCompilerButton = view.findViewById(R.id.slim_skin_pack_compiler_button);
         
         setupToolButtons();
     }
@@ -36,6 +40,24 @@ public class ToolsFragment extends Fragment {
             ChunkbaseWebViewFragment chunkbaseFragment = new ChunkbaseWebViewFragment();
             getParentFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, chunkbaseFragment)
+                .addToBackStack(null)
+                .commit();
+        });
+
+        skinPackCompilerButton.setOnClickListener(v -> {
+            // Navigate to Skin Pack Compiler WebView
+            SkinPackCompilerWebViewFragment skinPackFragment = new SkinPackCompilerWebViewFragment();
+            getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, skinPackFragment)
+                .addToBackStack(null)
+                .commit();
+        });
+
+        slimSkinPackCompilerButton.setOnClickListener(v -> {
+            // Navigate to Slim Skin Pack Compiler WebView
+            SlimSkinPackCompilerWebViewFragment slimSkinPackFragment = new SlimSkinPackCompilerWebViewFragment();
+            getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, slimSkinPackFragment)
                 .addToBackStack(null)
                 .commit();
         });
