@@ -230,9 +230,14 @@ public class WebViewFragment extends Fragment {
                     // Set headers
                     request.addRequestHeader("User-Agent", userAgent);
                     
-                    // Create custom download directory based on section
-                    String downloadDir = createCustomDownloadDirectory();
+                    // Get filename
                     String fileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
+                    
+                    // Create download directory based on section
+                    File downloadDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources/" + allowedSection);
+                    if (!downloadDir.exists()) {
+                        downloadDir.mkdirs();
+                    }
                     
                     // Set destination to custom directory
                     File downloadFile = new File(downloadDir, fileName);
@@ -247,35 +252,14 @@ public class WebViewFragment extends Fragment {
                     DownloadManager dm = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
                     dm.enqueue(request);
                     
-                    Toast.makeText(requireContext(), 
-                        "Download started: " + fileName + " to " + allowedSection + " folder", 
-                        Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Download started: " + fileName, Toast.LENGTH_SHORT).show();
                     
                 } catch (Exception e) {
-                    Log.e(TAG, "Download failed", e);
-                    Toast.makeText(requireContext(), "Download failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error starting download", e);
+                    Toast.makeText(requireContext(), "Download failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
-    }
-
-    private String createCustomDownloadDirectory() {
-        File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
-        File sectionDir = new File(baseDir, allowedSection);
-        
-        if (!sectionDir.exists()) {
-            if (!sectionDir.mkdirs()) {
-                // Fallback to app's external files directory if public storage fails
-                File fallbackDir = new File(requireContext().getExternalFilesDir(null), "resources");
-                File fallbackSectionDir = new File(fallbackDir, allowedSection);
-                if (!fallbackSectionDir.exists()) {
-                    fallbackSectionDir.mkdirs();
-                }
-                return fallbackSectionDir.getAbsolutePath();
-            }
-        }
-        
-        return sectionDir.getAbsolutePath();
     }
 
     private void loadInitialUrl() {
