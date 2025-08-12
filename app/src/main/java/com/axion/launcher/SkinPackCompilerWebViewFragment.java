@@ -92,9 +92,6 @@ public class SkinPackCompilerWebViewFragment extends Fragment {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
                 try {
-                    // Create download directory
-                    String downloadPath = createCustomDownloadDirectory();
-                    
                     // Get filename from URL or content disposition
                     String fileName = getFileNameFromUrl(url, contentDisposition);
                     
@@ -104,7 +101,14 @@ public class SkinPackCompilerWebViewFragment extends Fragment {
                     request.setTitle(fileName);
                     request.setDescription("Downloading skin pack file");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setDestinationInExternalPublicDir("axion/files/resources/textures", fileName);
+                    
+                    // Set destination to the textures folder
+                    File downloadDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources/textures");
+                    if (!downloadDir.exists()) {
+                        downloadDir.mkdirs();
+                    }
+                    File downloadFile = new File(downloadDir, fileName);
+                    request.setDestinationUri(Uri.fromFile(downloadFile));
                     
                     // Start download
                     DownloadManager downloadManager = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -119,25 +123,6 @@ public class SkinPackCompilerWebViewFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private String createCustomDownloadDirectory() {
-        File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
-        File sectionDir = new File(baseDir, "textures");
-        
-        if (!sectionDir.exists()) {
-            if (!sectionDir.mkdirs()) {
-                // Fallback to app's external files directory if public storage fails
-                File fallbackDir = new File(requireContext().getExternalFilesDir(null), "resources");
-                File fallbackSectionDir = new File(fallbackDir, "textures");
-                if (!fallbackSectionDir.exists()) {
-                    fallbackSectionDir.mkdirs();
-                }
-                return fallbackSectionDir.getAbsolutePath();
-            }
-        }
-        
-        return sectionDir.getAbsolutePath();
     }
 
     private String getFileNameFromUrl(String url, String contentDisposition) {
