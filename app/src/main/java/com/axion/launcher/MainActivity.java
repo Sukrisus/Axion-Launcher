@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private MCPEVersion selectedVersion;
     private ThemeManager themeManager;
+    private ApkModifier apkModifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize theme manager and apply saved theme
         themeManager = ThemeManager.getInstance(this);
         themeManager.setThemeMode(themeManager.getCurrentThemeMode());
+        
+        // Initialize ApkModifier
+        apkModifier = new ApkModifier(this);
         
         setContentView(R.layout.activity_main);
 
@@ -58,7 +62,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up ApkModifier to prevent memory leaks
+        if (apkModifier != null) {
+            apkModifier.shutdown();
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -113,5 +124,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void toggleTheme() {
         View rootView = findViewById(android.R.id.content);
         themeManager.toggleTheme(this, rootView);
+    }
+    
+    public ApkModifier getApkModifier() {
+        return apkModifier;
     }
 }

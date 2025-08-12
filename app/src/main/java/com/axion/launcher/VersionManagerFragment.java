@@ -3,6 +3,7 @@ package com.axion.launcher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -141,10 +142,12 @@ public class VersionManagerFragment extends Fragment {
         // Check which version is installed
         checkInstalledVersion();
         
-        // Debug: Print loaded versions
-        System.out.println("Loaded " + allVersions.size() + " versions");
-        for (MCPEVersion version : allVersions) {
-            System.out.println("Version: " + version.getVersionNumber() + " - " + version.getFilterType());
+        // Debug: Log loaded versions (only in debug builds)
+        if (BuildConfig.DEBUG) {
+            Log.d("VersionManager", "Loaded " + allVersions.size() + " versions");
+            for (MCPEVersion version : allVersions) {
+                Log.d("VersionManager", "Version: " + version.getVersionNumber() + " - " + version.getFilterType());
+            }
         }
         
         filterVersions();
@@ -161,27 +164,35 @@ public class VersionManagerFragment extends Fragment {
             // For demo purposes, let's assume version 1.21.100.6 is installed
             // In a real app, you'd get this from the package info
             String installedVersion = "1.21.100.6";
-            System.out.println("Checking for installed version: " + installedVersion);
+            if (BuildConfig.DEBUG) {
+                Log.d("VersionManager", "Checking for installed version: " + installedVersion);
+            }
             
             boolean foundMatch = false;
             for (MCPEVersion version : allVersions) {
                 boolean matches = isVersionMatch(installedVersion, version.getVersionNumber());
-                System.out.println("Checking " + version.getVersionNumber() + " against " + installedVersion + " = " + matches);
+                if (BuildConfig.DEBUG) {
+                    Log.d("VersionManager", "Checking " + version.getVersionNumber() + " against " + installedVersion + " = " + matches);
+                }
                 
                 if (matches) {
                     version.setInstalled(true);
                     foundMatch = true;
-                    System.out.println("✓ Marked version " + version.getVersionNumber() + " as installed (matches " + installedVersion + ")");
+                    if (BuildConfig.DEBUG) {
+                        Log.d("VersionManager", "✓ Marked version " + version.getVersionNumber() + " as installed (matches " + installedVersion + ")");
+                    }
                     break;
                 }
             }
             
-            if (!foundMatch) {
-                System.out.println("❌ No matching version found for " + installedVersion);
+            if (!foundMatch && BuildConfig.DEBUG) {
+                Log.d("VersionManager", "❌ No matching version found for " + installedVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
             // Minecraft PE is not installed
-            System.out.println("Minecraft PE is not installed");
+            if (BuildConfig.DEBUG) {
+                Log.d("VersionManager", "Minecraft PE is not installed");
+            }
         }
     }
     
@@ -193,20 +204,26 @@ public class VersionManagerFragment extends Fragment {
         String[] installedParts = installedVersion.split("\\.");
         String[] launcherParts = launcherVersion.split("\\.");
         
-        System.out.println("  Comparing: " + installedVersion + " vs " + launcherVersion);
-        System.out.println("  Installed parts: " + java.util.Arrays.toString(installedParts));
-        System.out.println("  Launcher parts: " + java.util.Arrays.toString(launcherParts));
+        if (BuildConfig.DEBUG) {
+            Log.d("VersionManager", "  Comparing: " + installedVersion + " vs " + launcherVersion);
+            Log.d("VersionManager", "  Installed parts: " + java.util.Arrays.toString(installedParts));
+            Log.d("VersionManager", "  Launcher parts: " + java.util.Arrays.toString(launcherParts));
+        }
         
         // If launcher version has more parts than installed, it can't match
         if (launcherParts.length > installedParts.length) {
-            System.out.println("  ❌ Launcher has more parts than installed");
+            if (BuildConfig.DEBUG) {
+                Log.d("VersionManager", "  ❌ Launcher has more parts than installed");
+            }
             return false;
         }
         
         // Check if all parts of the launcher version match the installed version
         for (int i = 0; i < launcherParts.length; i++) {
             if (i >= installedParts.length) {
-                System.out.println("  ❌ Index " + i + " out of bounds for installed parts");
+                if (BuildConfig.DEBUG) {
+                    Log.d("VersionManager", "  ❌ Index " + i + " out of bounds for installed parts");
+                }
                 return false;
             }
             
@@ -214,23 +231,33 @@ public class VersionManagerFragment extends Fragment {
                 int installedPart = Integer.parseInt(installedParts[i]);
                 int launcherPart = Integer.parseInt(launcherParts[i]);
                 
-                System.out.println("  Comparing part " + i + ": " + installedPart + " vs " + launcherPart);
+                if (BuildConfig.DEBUG) {
+                    Log.d("VersionManager", "  Comparing part " + i + ": " + installedPart + " vs " + launcherPart);
+                }
                 
                 if (installedPart != launcherPart) {
-                    System.out.println("  ❌ Parts don't match at index " + i);
+                    if (BuildConfig.DEBUG) {
+                        Log.d("VersionManager", "  ❌ Parts don't match at index " + i);
+                    }
                     return false;
                 }
             } catch (NumberFormatException e) {
                 // If parsing fails, do exact string comparison
-                System.out.println("  Comparing strings at index " + i + ": " + installedParts[i] + " vs " + launcherParts[i]);
+                if (BuildConfig.DEBUG) {
+                    Log.d("VersionManager", "  Comparing strings at index " + i + ": " + installedParts[i] + " vs " + launcherParts[i]);
+                }
                 if (!installedParts[i].equals(launcherParts[i])) {
-                    System.out.println("  ❌ String parts don't match at index " + i);
+                    if (BuildConfig.DEBUG) {
+                        Log.d("VersionManager", "  ❌ String parts don't match at index " + i);
+                    }
                     return false;
                 }
             }
         }
         
-        System.out.println("  ✅ All parts match!");
+        if (BuildConfig.DEBUG) {
+            Log.d("VersionManager", "  ✅ All parts match!");
+        }
         return true;
     }
     
@@ -242,7 +269,7 @@ public class VersionManagerFragment extends Fragment {
             }
         }
         
-        // Sort versions in ascending order (latest to oldest)
+        // Sort versions in descending order (latest to oldest)
         filteredVersions.sort((v1, v2) -> {
             String[] parts1 = v1.getVersionNumber().split("\\.");
             String[] parts2 = v2.getVersionNumber().split("\\.");
@@ -254,16 +281,19 @@ public class VersionManagerFragment extends Fragment {
                 int num2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
                 
                 if (num1 != num2) {
-                    return Integer.compare(num1, num2);
+                    // Reverse comparison for descending order (latest first)
+                    return Integer.compare(num2, num1);
                 }
             }
             return 0;
         });
         
-        // Debug: Print filtered and sorted versions
-        System.out.println("Filter: " + currentFilter + " - Found " + filteredVersions.size() + " versions");
-        for (MCPEVersion version : filteredVersions) {
-            System.out.println("Filtered & Sorted: " + version.getVersionNumber() + " (Installed: " + version.isInstalled() + ")");
+        // Debug: Log filtered and sorted versions (only in debug builds)
+        if (BuildConfig.DEBUG) {
+            Log.d("VersionManager", "Filter: " + currentFilter + " - Found " + filteredVersions.size() + " versions");
+            for (MCPEVersion version : filteredVersions) {
+                Log.d("VersionManager", "Filtered & Sorted: " + version.getVersionNumber() + " (Installed: " + version.isInstalled() + ")");
+            }
         }
         
         versionAdapter.updateVersions(filteredVersions);

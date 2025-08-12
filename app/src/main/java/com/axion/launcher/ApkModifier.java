@@ -19,6 +19,9 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.*;
 
 public class ApkModifier {
@@ -27,6 +30,8 @@ public class ApkModifier {
     
     private Context context;
     private ProgressCallback progressCallback;
+    private ExecutorService executorService;
+    private Future<?> currentTask;
     
     public interface ProgressCallback {
         void onProgress(String status, int progress);
@@ -36,6 +41,7 @@ public class ApkModifier {
     
     public ApkModifier(Context context) {
         this.context = context;
+        this.executorService = Executors.newSingleThreadExecutor();
     }
     
     public void setProgressCallback(ProgressCallback callback) {
@@ -43,7 +49,12 @@ public class ApkModifier {
     }
     
     public void modifyApk(String newAppName, String newPackageName, Bitmap newIcon) {
-        new Thread(() -> {
+        // Cancel any existing task
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(true);
+        }
+        
+        currentTask = executorService.submit(() -> {
             try {
                 // Step 1: Check if MCPE is installed
                 updateProgress("Checking Minecraft PE installation...", 5);
@@ -121,7 +132,16 @@ public class ApkModifier {
                 Log.e(TAG, "Error modifying APK", e);
                 onError("Error: " + e.getMessage());
             }
-        }).start();
+        });
+    }
+    
+    public void shutdown() {
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(true);
+        }
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
     }
     
     private boolean isPackageInstalled(String packageName) {
@@ -194,7 +214,16 @@ public class ApkModifier {
     }
     
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+        // Validate file path to prevent path traversal
         File file = new File(filePath);
+        File outputDir = new File(context.getExternalFilesDir(null), "apk_mod");
+        File canonicalFile = file.getCanonicalFile();
+        File canonicalOutputDir = outputDir.getCanonicalFile();
+        
+        if (!canonicalFile.toPath().startsWith(canonicalOutputDir.toPath())) {
+            throw new SecurityException("Path traversal attempt detected: " + filePath);
+        }
+        
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
@@ -315,6 +344,15 @@ public class ApkModifier {
     }
     
     private void compressDirectory(File sourceDir, String parentName, ZipOutputStream zipOut) throws IOException {
+        // Validate source directory to prevent path traversal
+        File outputDir = new File(context.getExternalFilesDir(null), "apk_mod");
+        File canonicalSourceDir = sourceDir.getCanonicalFile();
+        File canonicalOutputDir = outputDir.getCanonicalFile();
+        
+        if (!canonicalSourceDir.toPath().startsWith(canonicalOutputDir.toPath())) {
+            throw new SecurityException("Path traversal attempt detected in source directory: " + sourceDir.getPath());
+        }
+        
         File[] files = sourceDir.listFiles();
         if (files != null) {
             for (File file : files) {

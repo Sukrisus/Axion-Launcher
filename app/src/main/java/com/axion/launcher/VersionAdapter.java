@@ -1,5 +1,6 @@
 package com.axion.launcher;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,9 @@ public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionV
 
     public void updateVersions(List<MCPEVersion> newVersions) {
         this.versions = newVersions;
-        System.out.println("Adapter: Updating with " + newVersions.size() + " versions");
+        if (BuildConfig.DEBUG) {
+            Log.d("VersionAdapter", "Adapter: Updating with " + newVersions.size() + " versions");
+        }
         notifyDataSetChanged();
     }
 
