@@ -313,13 +313,13 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             
             // Check if already processing
             if (isProcessing) {
-                Toast.makeText(requireContext(), "APK modification already in progress", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "APK installation already in progress", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             // Check if ApkModifier is already working
             if (apkModifier != null && apkModifier.isModifying()) {
-                Toast.makeText(requireContext(), "APK modification already in progress", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "APK installation already in progress", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -362,7 +362,7 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             
             // Validate ApkModifier is properly initialized
             if (apkModifier == null) {
-                Toast.makeText(requireContext(), "Error: APK modifier not initialized", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Error: APK installer not initialized", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -370,22 +370,21 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             showConfirmationDialog(newAppName, newPackageName);
             
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error starting APK modification: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Error starting APK installation: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
     private void showConfirmationDialog(String appName, String packageName) {
         try {
             new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Confirm APK Modification")
+                .setTitle("Install Minecraft PE")
                 .setMessage("This will:\n\n" +
-                           "• Extract Minecraft PE APK\n" +
-                           "• Change app name to: " + appName + "\n" +
-                           "• Change package to: " + packageName + "\n" +
-                           "• Replace the app icon\n" +
-                           "• Sign and install the modified APK\n\n" +
-                           "This process may take several minutes. Continue?")
-                .setPositiveButton("Start Modification", (dialog, which) -> {
+                           "• Extract Minecraft PE APK from your device\n" +
+                           "• Install it using the system package installer\n" +
+                           "• Allow you to have multiple versions installed\n\n" +
+                           "This creates a copy of the original APK that can be installed alongside the existing version.\n\n" +
+                           "Continue?")
+                .setPositiveButton("Install Minecraft PE", (dialog, which) -> {
                     try {
                         // Check if fragment is still attached
                         if (!isAdded() || getActivity() == null) {
@@ -396,14 +395,14 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
                         showBottomProgressBar();
                         showProgressDialog();
                         
-                        // Start the real APK modification process
+                        // Start the APK extraction and installation process
                         if (apkModifier != null) {
                             apkModifier.modifyApk(appName, packageName, selectedIcon);
                         } else {
-                            onError("APK modifier not initialized");
+                            onError("APK installer not initialized");
                         }
                     } catch (Exception e) {
-                        onError("Failed to start APK modification: " + e.getMessage());
+                        onError("Failed to start APK installation: " + e.getMessage());
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
@@ -524,8 +523,8 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     private void showCancelConfirmation() {
         try {
             new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Cancel APK Modification?")
-                .setMessage("Are you sure you want to cancel the APK modification process? This will stop the current operation.")
+                .setTitle("Cancel APK Installation?")
+                .setMessage("Are you sure you want to cancel the APK installation process? This will stop the current operation.")
                 .setPositiveButton("Yes, Cancel", (dialog, which) -> {
                     try {
                         if (apkModifier != null) {
@@ -535,9 +534,9 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
                         if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
-                        Toast.makeText(requireContext(), "APK modification cancelled", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "APK installation cancelled", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
-                        Toast.makeText(requireContext(), "Error cancelling modification: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Error cancelling installation: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Continue", (dialog, which) -> dialog.dismiss())
@@ -615,15 +614,11 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
                 progressDialog.dismiss();
             }
             
-            String appName = appNameInput != null ? appNameInput.getText().toString().trim() : "";
-            String packageName = packageNameInput != null ? packageNameInput.getText().toString().trim() : "";
-            
             new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Success!")
-                .setMessage("Your customized Minecraft PE has been created and the installation dialog should appear.\n\n" +
-                           "App Name: " + appName + "\n" +
-                           "Package: " + packageName + "\n\n" +
-                           "The modified APK has been saved and is ready to install!")
+                .setMessage("Minecraft PE APK has been extracted and the installation dialog should appear!\n\n" +
+                           "The system package installer will now guide you through the installation process.\n\n" +
+                           "This will create a copy of Minecraft PE that can be installed alongside your existing version.")
                 .setPositiveButton("Great!", (dialog, which) -> dialog.dismiss())
                 .setIcon(R.drawable.ic_check_circle)
                 .show();
@@ -650,7 +645,11 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             
             new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Error")
-                .setMessage("Failed to modify APK:\n\n" + error)
+                .setMessage("Failed to install Minecraft PE:\n\n" + error + "\n\n" +
+                           "Please make sure:\n" +
+                           "• Minecraft PE is installed on your device\n" +
+                           "• You have enabled 'Install unknown apps' in settings\n" +
+                           "• You have granted necessary permissions")
                 .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                 .setIcon(R.drawable.ic_error)
                 .show();
