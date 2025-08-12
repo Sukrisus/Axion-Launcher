@@ -177,19 +177,22 @@ public class WebViewFragment extends Fragment {
             return false;
         }
         
-        // Allow non-modbay.org URLs (external links)
+        // Allow all non-modbay.org URLs (external links)
         if (!url.contains("modbay.org")) {
             return true;
         }
         
-        // Check if URL matches the allowed section
+        // For modbay.org URLs, only block cross-section navigation
         switch (allowedSection) {
             case "mods":
-                return url.contains("/mods/") || url.equals("https://modbay.org/mods/") || url.equals("https://modbay.org/mods");
+                // Block only textures and maps sections
+                return !url.contains("/textures/") && !url.contains("/maps/");
             case "textures":
-                return url.contains("/textures/") || url.equals("https://modbay.org/textures/") || url.equals("https://modbay.org/textures");
+                // Block only mods and maps sections
+                return !url.contains("/mods/") && !url.contains("/maps/");
             case "maps":
-                return url.contains("/maps/") || url.equals("https://modbay.org/maps/") || url.equals("https://modbay.org/maps");
+                // Block only mods and textures sections
+                return !url.contains("/mods/") && !url.contains("/textures/");
             default:
                 return false;
         }
