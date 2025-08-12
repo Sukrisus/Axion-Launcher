@@ -16,6 +16,9 @@ import java.util.List;
 
 public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionViewHolder> {
 
+    private static final String TAG = "VersionAdapter";
+    private static final boolean DEBUG = false; // Set to true for debug logging
+    
     private List<MCPEVersion> versions;
     private OnVersionActionListener actionListener;
 
@@ -61,8 +64,8 @@ public class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VersionV
 
     public void updateVersions(List<MCPEVersion> newVersions) {
         this.versions = newVersions;
-        if (BuildConfig.DEBUG) {
-            Log.d("VersionAdapter", "Adapter: Updating with " + newVersions.size() + " versions");
+        if (DEBUG) {
+            Log.d(TAG, "Adapter: Updating with " + newVersions.size() + " versions");
         }
         notifyDataSetChanged();
     }
