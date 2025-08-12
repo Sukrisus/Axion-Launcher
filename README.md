@@ -1,135 +1,227 @@
 # Axion Launcher
 
-[![Android Build](https://github.com/yourusername/axion-launcher/workflows/Android%20Build/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
-[![Test Build](https://github.com/yourusername/axion-launcher/workflows/Test%20Build/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
-[![Code Quality](https://github.com/yourusername/axion-launcher/workflows/Code%20Quality/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
+[![Build Origin App](https://github.com/yourusername/axion-launcher/workflows/Build%20Origin%20App/badge.svg)](https://github.com/yourusername/axion-launcher/actions)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A simple and clean Android launcher for Minecraft PE with Material Design UI.
+A modern and feature-rich Android launcher for Minecraft PE with Material Design UI, version management, and customizable themes.
 
-## Features
+## ✨ Features
 
-- **Clean Material Design UI**: Beautiful lavender-themed interface following Material Design guidelines
-- **Navigation Drawer**: Easy navigation between Dashboard, Settings, and Information sections
+### 🎨 **Modern UI & Themes**
+- **Material Design 3**: Clean, modern interface following Google's latest design guidelines
+- **Multiple Themes**: Choose from various color themes and appearance options
+- **Customizable Appearance**: Personalize your launcher experience
+- **Navigation Drawer**: Intuitive navigation between different sections
+
+### 🚀 **Version Management**
+- **Multiple MCPE Versions**: Manage and switch between different Minecraft PE versions
+- **Version Information**: Display detailed version information and status
+- **Easy Version Switching**: Quick access to different game versions
+- **Version Validation**: Automatic verification of installed versions
+
+### 🎮 **Launch Features**
 - **One-Click Launch**: Launch Minecraft PE with a single button press
-- **Version Information**: Display current Minecraft PE version and status
-- **Settings Panel**: Configure app preferences and options
-- **Information Section**: Learn about the app and its features
+- **Quick Access**: Fast access to your favorite game versions
+- **Launch History**: Keep track of recently launched versions
 
-## Screenshots
+### ⚙️ **Settings & Configuration**
+- **Comprehensive Settings**: Configure app preferences and options
+- **Theme Management**: Switch between different visual themes
+- **Appearance Customization**: Adjust colors, layouts, and visual elements
+- **User Preferences**: Personalize your launcher experience
 
-The app features a clean interface with:
-- Navigation drawer with Dashboard, Settings, and Info sections
-- Main dashboard with version card and launch button
-- Material Design cards and components
-- Lavender color scheme
+## 📱 Requirements
 
-## Requirements
+- **Android Version**: API Level 21 (Android 5.0 Lollipop) or higher
+- **Target SDK**: Android 13 (API Level 33)
+- **Java Version**: Java 17
+- **Minecraft PE**: Must be installed on the device
+- **Permissions**: 
+  - Storage access for version management
+  - Package installation permissions
 
-- Android API Level 21 (Android 5.0) or higher
-- Minecraft PE installed on the device
+## 🚀 Installation
 
-## Installation
-
-### Option 1: Build from Source
-1. Clone this repository
-2. Open the project in Android Studio
-3. Build and run the app on your device
-
-### Option 2: Download from GitHub Actions
+### Option 1: Download from GitHub Actions
 1. Go to the [Actions](https://github.com/yourusername/axion-launcher/actions) tab
-2. Download the latest APK from the "Test Build" workflow
-3. Install the APK on your Android device
+2. Select the latest "Build Origin App" workflow run
+3. Download the `app-debug-apk` or `app-release-apk` artifact
+4. Extract and install the APK on your Android device
 
-### Option 3: Release Downloads
-1. Go to the [Releases](https://github.com/yourusername/axion-launcher/releases) page
-2. Download the latest release APK
-3. Install the APK on your Android device
-
-## Usage
-
-1. Open the Axion Launcher app
-2. Navigate through the drawer menu to access different sections
-3. On the Dashboard, click the "Launch" button to start Minecraft PE
-4. Use the Settings section to configure app preferences
-5. Check the Information section for app details
-
-## Project Structure
-
-```
-app/
-├── src/main/
-│   ├── java/com/axion/launcher/
-│   │   ├── MainActivity.java          # Main activity with navigation drawer
-│   │   ├── DashboardFragment.java     # Dashboard fragment with launch button
-│   │   ├── SettingsFragment.java      # Settings fragment
-│   │   └── InfoFragment.java          # Information fragment
-│   ├── res/
-│   │   ├── layout/                    # Layout files
-│   │   ├── values/                    # Resources (strings, colors, themes)
-│   │   ├── drawable/                  # Vector drawables
-│   │   └── menu/                      # Navigation menu
-│   └── AndroidManifest.xml           # App manifest
-└── build.gradle                      # App-level build configuration
-```
-
-## Dependencies
-
-- AndroidX AppCompat
-- Material Design Components
-- Navigation Components
-- ConstraintLayout
-
-## CI/CD
-
-This project uses GitHub Actions for continuous integration and deployment:
-
-### Workflows
-
-1. **Android Build** (`android-build.yml`)
-   - Triggers on push to main/master and pull requests
-   - Builds the project and runs tests
-   - Creates release APK artifacts
-   - Uploads build reports and test results
-
-2. **Release** (`release.yml`)
-   - Triggers when a new tag is pushed (e.g., `v1.0.0`)
-   - Creates a GitHub release with the APK attached
-   - Automatically generates release notes
-
-3. **Code Quality** (`code-quality.yml`)
-   - Runs Android Lint for code quality checks
-   - Performs security analysis with OWASP Dependency Check
-   - Uploads lint and security reports
-
-4. **Test Build** (`test-build.yml`)
-   - Manual trigger or on push to main/master
-   - Validates the build process
-   - Creates debug APK for testing
-
-### Building Locally
-
+### Option 2: Build from Source
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/axion-launcher.git
 cd axion-launcher
 
+# Grant execute permission
+chmod +x ./gradlew
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK  
+./gradlew assembleRelease
+```
+
+### Option 3: Android Studio
+1. Clone this repository
+2. Open the project in Android Studio
+3. Sync Gradle files
+4. Build and run the app on your device or emulator
+
+## 📖 Usage
+
+1. **Open Axion Launcher** - Launch the app from your device
+2. **Navigate Sections** - Use the drawer menu to access:
+   - 🏠 **Dashboard** - Main launch interface
+   - 📱 **Version Manager** - Manage MCPE versions
+   - 🎨 **Appearance** - Customize themes and UI
+   - ⚙️ **Settings** - Configure app preferences
+   - ℹ️ **Info** - App information and details
+3. **Launch Games** - Select a version and tap launch
+4. **Customize** - Personalize themes and appearance
+5. **Manage Versions** - Add, remove, or switch between MCPE versions
+
+## 🏗️ Project Structure
+
+```
+app/
+├── src/main/
+│   ├── java/com/axion/launcher/
+│   │   ├── MainActivity.java              # Main activity with navigation
+│   │   ├── DashboardFragment.java         # Main dashboard interface
+│   │   ├── VersionManagerFragment.java    # Version management system
+│   │   ├── AppearanceFragment.java        # Theme and appearance settings
+│   │   ├── SettingsFragment.java          # App configuration
+│   │   ├── InfoFragment.java              # Information section
+│   │   ├── MCPEVersion.java               # Version data model
+│   │   ├── VersionAdapter.java            # Version list adapter
+│   │   └── ThemeManager.java              # Theme management system
+│   ├── res/
+│   │   ├── layout/                        # UI layout files
+│   │   ├── values/                        # Resources (strings, colors, themes)
+│   │   ├── drawable/                      # Vector drawables and icons
+│   │   └── menu/                          # Navigation menu definitions
+│   └── AndroidManifest.xml               # App manifest and permissions
+├── build.gradle                          # App-level build configuration
+└── proguard-rules.pro                    # ProGuard configuration
+```
+
+## 🔧 Dependencies
+
+### Core Android Libraries
+- **AndroidX AppCompat** `1.6.1` - Backward compatibility
+- **Material Design Components** `1.9.0` - Modern UI components
+- **ConstraintLayout** `2.1.4` - Flexible layouts
+
+### Navigation & Architecture
+- **Navigation Fragment** `2.5.3` - Fragment navigation
+- **Navigation UI** `2.5.3` - Navigation UI components
+- **Lifecycle LiveData** `2.6.1` - Lifecycle-aware data
+- **Lifecycle ViewModel** `2.6.1` - UI state management
+
+### Testing
+- **JUnit** `4.13.2` - Unit testing framework
+- **AndroidX Test** `1.1.5` - Android testing
+- **Espresso** `3.5.1` - UI testing
+
+## 🔄 CI/CD Pipeline
+
+This project uses **GitHub Actions** for continuous integration and deployment:
+
+### Build Workflow (`main.yml`)
+- **Triggers**: Push to main/master, Pull Requests
+- **Environment**: Ubuntu Latest with JDK 17
+- **Android NDK**: Version 27.1.12297006
+- **Caching**: Gradle dependencies and wrapper
+- **Artifacts**: Both debug and release APKs
+- **Build Commands**:
+  ```bash
+  ./gradlew assembleDebug --stacktrace
+  ./gradlew assembleRelease --stacktrace
+  ```
+
+### Development Commands
+
+```bash
 # Build the project
 ./gradlew build
 
 # Run tests
 ./gradlew test
 
-# Build debug APK
-./gradlew assembleDebug
+# Run lint checks
+./gradlew lint
 
-# Build release APK
+# Clean build
+./gradlew clean
+
+# Build specific variants
+./gradlew assembleDebug
 ./gradlew assembleRelease
+
+# Install on connected device
+./gradlew installDebug
 ```
 
-## License
+## 🎨 Theming & Customization
 
-This project is open source and available under the MIT License.
+The app supports multiple themes and appearance customization:
 
-## Contributing
+- **Material Design 3** color system
+- **Dynamic theming** based on user preferences
+- **Custom color schemes** for different visual styles
+- **Theme persistence** across app sessions
+- **Appearance settings** for fine-tuning the UI
 
-Feel free to submit issues and enhancement requests!
+## 🔒 Permissions
+
+The app requires the following permissions:
+
+- `READ_EXTERNAL_STORAGE` - Access game files and versions
+- `WRITE_EXTERNAL_STORAGE` - Manage version installations
+- `REQUEST_INSTALL_PACKAGES` - Install APK packages
+
+## 📄 License
+
+This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add some amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Development Guidelines
+- Follow **Material Design** guidelines
+- Write **clean, documented code**
+- Add **tests** for new features
+- Ensure **compatibility** with Android 5.0+
+- Test on **multiple devices** and screen sizes
+
+## 🐛 Issues & Support
+
+- **Bug Reports**: [Create an issue](https://github.com/yourusername/axion-launcher/issues/new?template=bug_report.md)
+- **Feature Requests**: [Request a feature](https://github.com/yourusername/axion-launcher/issues/new?template=feature_request.md)
+- **Questions**: [Start a discussion](https://github.com/yourusername/axion-launcher/discussions)
+
+## 🏷️ Version History
+
+- **v1.0** - Initial release with basic launcher functionality
+- **Current** - Enhanced version management and theming system
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for the Minecraft PE community</p>
+  <p>
+    <a href="#axion-launcher">Back to Top</a> •
+    <a href="https://github.com/yourusername/axion-launcher/issues">Report Bug</a> •
+    <a href="https://github.com/yourusername/axion-launcher/discussions">Request Feature</a>
+  </p>
+</div>
