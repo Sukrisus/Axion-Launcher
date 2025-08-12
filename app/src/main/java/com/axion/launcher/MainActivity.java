@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new DashboardFragment();
         } else if (itemId == R.id.nav_version_manager) {
             selectedFragment = new VersionManagerFragment();
+        } else if (itemId == R.id.nav_resource_installer) {
+            selectedFragment = new ResourceInstallerFragment();
         } else if (itemId == R.id.nav_settings) {
             selectedFragment = new SettingsFragment();
         } else if (itemId == R.id.nav_info) {
