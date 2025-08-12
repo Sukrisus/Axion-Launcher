@@ -13,6 +13,9 @@
     <!-- Internal cache directory -->
     <cache-path name="internal_cache" path="."/>
     
+    <!-- Resources directory for downloaded files -->
+    <external-files-path name="resources" path="resources/"/>
+    
     <!-- Root directory for emergency access -->
     <root-path name="root" path="."/>
 </paths>

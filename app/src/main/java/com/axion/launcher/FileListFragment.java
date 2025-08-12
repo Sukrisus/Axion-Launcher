@@ -170,27 +170,86 @@ public class FileListFragment extends Fragment {
 
     private void openInMinecraft(ResourceFile resourceFile) {
         try {
+            File file = resourceFile.getFile();
+            
+            // Use FileProvider to get a proper content URI
+            Uri fileUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                file
+            );
+            
+            // Determine MIME type based on file extension
+            String mimeType = getMimeTypeForFile(resourceFile.getExtension());
+            
+            // Try multiple approaches to open the file
+            
+            // Approach 1: Direct VIEW intent to Minecraft PE
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(resourceFile.getFile()), "application/octet-stream");
+            intent.setDataAndType(fileUri, mimeType);
             intent.setPackage("com.mojang.minecraftpe");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             
             if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
                 startActivity(intent);
-            } else {
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Minecraft PE Not Found")
-                    .setMessage("Minecraft PE is not installed on this device.")
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                    .show();
+                return;
             }
+            
+            // Approach 2: SEND intent to Minecraft PE
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.setType(mimeType);
+            sendIntent.setPackage("com.mojang.minecraftpe");
+            sendIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            
+            if (sendIntent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(sendIntent);
+                return;
+            }
+            
+            // Approach 3: Let system choose the app
+            Intent fallbackIntent = new Intent(Intent.ACTION_VIEW);
+            fallbackIntent.setDataAndType(fileUri, mimeType);
+            fallbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            
+            if (fallbackIntent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(fallbackIntent);
+                return;
+            }
+            
+            // Approach 4: Show app chooser
+            Intent chooserIntent = Intent.createChooser(fallbackIntent, "Open with");
+            startActivity(chooserIntent);
+            
         } catch (Exception e) {
             Log.e(TAG, "Error opening file in Minecraft", e);
             new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Error")
-                .setMessage("Failed to open file in Minecraft PE.")
+                .setMessage("Failed to open file: " + e.getMessage())
                 .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                 .show();
+        }
+    }
+
+    private String getMimeTypeForFile(String extension) {
+        switch (extension.toLowerCase()) {
+            case ".mcaddon":
+                return "application/minecraft-addon";
+            case ".mcpack":
+                return "application/minecraft-pack";
+            case ".mctemplate":
+                return "application/minecraft-template";
+            case ".mcaddon.zip":
+                return "application/zip";
+            case ".mcpack.zip":
+                return "application/zip";
+            case ".mctemplate.zip":
+                return "application/zip";
+            default:
+                return "application/octet-stream";
         }
     }
 
