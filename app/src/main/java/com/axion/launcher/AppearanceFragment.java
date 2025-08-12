@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
 
-public class AppearanceFragment extends Fragment {
+public class AppearanceFragment extends Fragment implements ApkModifier.ProgressCallback {
 
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static final String DEFAULT_PACKAGE_NAME = "com.mojang.minecraftpe";
@@ -53,6 +53,12 @@ public class AppearanceFragment extends Fragment {
     private MaterialButton changeAppearanceButton;
     private Bitmap selectedIcon;
     private String selectedIconPath;
+    
+    private ApkModifier apkModifier;
+    private AlertDialog progressDialog;
+    private TextView progressStatus;
+    private TextView progressPercentage;
+    private LinearProgressIndicator progressBar;
     
     private ActivityResultLauncher<String> imagePickerLauncher;
     private ActivityResultLauncher<String> permissionLauncher;
@@ -74,6 +80,10 @@ public class AppearanceFragment extends Fragment {
         packageNameInput = view.findViewById(R.id.package_name_input);
         changeAppearanceButton = view.findViewById(R.id.change_appearance_button);
         MaterialCardView iconContainer = view.findViewById(R.id.icon_container);
+        
+        // Initialize APK modifier
+        apkModifier = new ApkModifier(requireContext());
+        apkModifier.setProgressCallback(this);
         
         // Set default package name
         packageNameInput.setText(DEFAULT_PACKAGE_NAME);
@@ -130,7 +140,7 @@ public class AppearanceFragment extends Fragment {
         iconContainer.setOnClickListener(v -> selectImage());
         
         // Set up change appearance button
-        changeAppearanceButton.setOnClickListener(v -> startAppearanceModification());
+        changeAppearanceButton.setOnClickListener(v -> startApkModification());
     }
     
     private void selectImage() {
@@ -211,7 +221,7 @@ public class AppearanceFragment extends Fragment {
         }
     }
     
-    private void startAppearanceModification() {
+    private void startApkModification() {
         String newAppName = appNameInput.getText().toString().trim();
         String newPackageName = packageNameInput.getText().toString().trim();
         
@@ -236,7 +246,41 @@ public class AppearanceFragment extends Fragment {
             return;
         }
         
-        showProgressDialog(newAppName, newPackageName);
+        // Check if Minecraft PE is installed
+        try {
+            requireContext().getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+        } catch (Exception e) {
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Minecraft PE Not Found")
+                .setMessage("Minecraft PE (com.mojang.minecraftpe) is not installed on this device. Please install it first.")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .setIcon(R.drawable.ic_info)
+                .show();
+            return;
+        }
+        
+        // Show confirmation dialog
+        showConfirmationDialog(newAppName, newPackageName);
+    }
+    
+    private void showConfirmationDialog(String appName, String packageName) {
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Confirm APK Modification")
+            .setMessage("This will:\n\n" +
+                       "• Extract Minecraft PE APK\n" +
+                       "• Change app name to: " + appName + "\n" +
+                       "• Change package to: " + packageName + "\n" +
+                       "• Replace the app icon\n" +
+                       "• Sign and install the modified APK\n\n" +
+                       "This process may take several minutes. Continue?")
+            .setPositiveButton("Start Modification", (dialog, which) -> {
+                showProgressDialog();
+                // Start the real APK modification process
+                apkModifier.modifyApk(appName, packageName, selectedIcon);
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+            .setIcon(R.drawable.ic_build)
+            .show();
     }
     
     private boolean isValidPackageName(String packageName) {
@@ -276,90 +320,66 @@ public class AppearanceFragment extends Fragment {
         return true;
     }
     
-    private void showProgressDialog(String newAppName, String newPackageName) {
+    private void showProgressDialog() {
         View progressView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_progress, null);
-        TextView progressStatus = progressView.findViewById(R.id.progress_status);
-        TextView progressPercentage = progressView.findViewById(R.id.progress_percentage);
-        LinearProgressIndicator progressBar = progressView.findViewById(R.id.progress_bar);
+        progressStatus = progressView.findViewById(R.id.progress_status);
+        progressPercentage = progressView.findViewById(R.id.progress_percentage);
+        progressBar = progressView.findViewById(R.id.progress_bar);
         
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+        progressDialog = new MaterialAlertDialogBuilder(requireContext())
                 .setView(progressView)
+                .setTitle("Modifying APK")
                 .setCancelable(false)
                 .create();
         
-        dialog.show();
-        
-        // Start the modification process
-        new Thread(() -> {
-            try {
-                // Simulate the modification process with progress updates
-                updateProgress(progressStatus, progressPercentage, progressBar, "Extracting APK...", 10);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Replacing icon...", 25);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Updating app name...", 40);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Changing package name...", 55);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Rebuilding APK...", 70);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Signing APK...", 85);
-                Thread.sleep(800);
-                
-                updateProgress(progressStatus, progressPercentage, progressBar, "Installing APK...", 95);
-                Thread.sleep(500);
-                
-                // Simulate APK installation
-                requireActivity().runOnUiThread(() -> {
-                    dialog.dismiss();
-                    installModifiedAPK(newAppName, newPackageName);
-                });
-                
-            } catch (InterruptedException e) {
-                requireActivity().runOnUiThread(() -> {
-                    dialog.dismiss();
-                    Toast.makeText(requireContext(), "Operation cancelled", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).start();
+        progressDialog.show();
     }
     
-    private void installModifiedAPK(String appName, String packageName) {
-        try {
-            // In a real implementation, this would install the actual modified APK
-            // For now, we'll simulate the installation process
+    // ApkModifier.ProgressCallback implementation
+    @Override
+    public void onProgress(String status, int progress) {
+        requireActivity().runOnUiThread(() -> {
+            if (progressStatus != null) progressStatus.setText(status);
+            if (progressPercentage != null) progressPercentage.setText(progress + "%");
+            if (progressBar != null) progressBar.setProgress(progress);
+        });
+    }
+    
+    @Override
+    public void onSuccess(String apkPath) {
+        requireActivity().runOnUiThread(() -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
             
-            Toast.makeText(requireContext(), 
-                "APK modification completed!\nApp: " + appName + "\nPackage: " + packageName, 
-                Toast.LENGTH_LONG).show();
-                
-            // Show success message
+            String appName = appNameInput.getText().toString().trim();
+            String packageName = packageNameInput.getText().toString().trim();
+            
             new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Success!")
-                .setMessage("Your customized Minecraft PE has been created and installed successfully.\n\n" +
+                .setMessage("Your customized Minecraft PE has been created and the installation dialog should appear.\n\n" +
                            "App Name: " + appName + "\n" +
                            "Package: " + packageName + "\n\n" +
-                           "You can now find it in your app drawer!")
+                           "The modified APK has been saved and is ready to install!")
                 .setPositiveButton("Great!", (dialog, which) -> dialog.dismiss())
                 .setIcon(R.drawable.ic_check_circle)
                 .show();
-                
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error installing APK: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        });
     }
     
-    private void updateProgress(TextView status, TextView percentage, LinearProgressIndicator progressBar, 
-                              String statusText, int progress) {
+    @Override
+    public void onError(String error) {
         requireActivity().runOnUiThread(() -> {
-            status.setText(statusText);
-            percentage.setText(progress + "%");
-            progressBar.setProgress(progress);
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Error")
+                .setMessage("Failed to modify APK:\n\n" + error)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .setIcon(R.drawable.ic_error)
+                .show();
         });
     }
 }
