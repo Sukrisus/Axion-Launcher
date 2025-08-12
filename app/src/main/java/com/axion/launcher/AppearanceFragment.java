@@ -104,8 +104,12 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         minimizeButton = bottomProgressContainer.findViewById(R.id.minimize_button);
         cancelButton = bottomProgressContainer.findViewById(R.id.cancel_button);
         
-        // Initialize APK modifier
-        apkModifier = new ApkModifier(requireContext());
+        // Initialize APK modifier from MainActivity or create new one
+        if (getActivity() instanceof MainActivity) {
+            apkModifier = ((MainActivity) getActivity()).getApkModifier();
+        } else {
+            apkModifier = new ApkModifier(requireContext());
+        }
         apkModifier.setProgressCallback(this);
         
         // Set default package name
@@ -176,6 +180,30 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         cancelButton.setOnClickListener(v -> {
             showCancelConfirmation();
         });
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Pause any ongoing operations if needed
+        if (apkModifier != null && isProcessing) {
+            // Don't shutdown here, just pause the UI updates
+        }
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Clean up resources
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+        
+        // Don't shutdown the ApkModifier here as it's shared with MainActivity
+        // Just remove the callback
+        if (apkModifier != null) {
+            apkModifier.setProgressCallback(null);
+        }
     }
     
     private void selectImage() {
@@ -257,66 +285,101 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     }
     
     private void startApkModification() {
-        String newAppName = appNameInput.getText().toString().trim();
-        String newPackageName = packageNameInput.getText().toString().trim();
-        
-        // Validate inputs
-        if (newAppName.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter an app name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        if (newPackageName.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter a package name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        if (!isValidPackageName(newPackageName)) {
-            Toast.makeText(requireContext(), "Invalid package name format. Use: com.example.appname", Toast.LENGTH_LONG).show();
-            return;
-        }
-        
-        if (selectedIcon == null) {
-            Toast.makeText(requireContext(), "Please select an icon", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // Check if Minecraft PE is installed
         try {
-            requireContext().getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+            // Check if already processing
+            if (isProcessing) {
+                Toast.makeText(requireContext(), "APK modification already in progress", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Check if ApkModifier is already working
+            if (apkModifier != null && apkModifier.isModifying()) {
+                Toast.makeText(requireContext(), "APK modification already in progress", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            String newAppName = appNameInput.getText().toString().trim();
+            String newPackageName = packageNameInput.getText().toString().trim();
+            
+            // Validate inputs
+            if (newAppName.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter an app name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (newPackageName.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter a package name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (!isValidPackageName(newPackageName)) {
+                Toast.makeText(requireContext(), "Invalid package name format. Use: com.example.appname", Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            if (selectedIcon == null) {
+                Toast.makeText(requireContext(), "Please select an icon", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Check if Minecraft PE is installed
+            try {
+                requireContext().getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Minecraft PE Not Found")
+                    .setMessage("Minecraft PE (com.mojang.minecraftpe) is not installed on this device. Please install it first.")
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .setIcon(R.drawable.ic_info)
+                    .show();
+                return;
+            }
+            
+            // Validate ApkModifier is properly initialized
+            if (apkModifier == null) {
+                Toast.makeText(requireContext(), "Error: APK modifier not initialized", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Show confirmation dialog
+            showConfirmationDialog(newAppName, newPackageName);
+            
         } catch (Exception e) {
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Minecraft PE Not Found")
-                .setMessage("Minecraft PE (com.mojang.minecraftpe) is not installed on this device. Please install it first.")
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .setIcon(R.drawable.ic_info)
-                .show();
-            return;
+            Toast.makeText(requireContext(), "Error starting APK modification: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
-        
-        // Show confirmation dialog
-        showConfirmationDialog(newAppName, newPackageName);
     }
     
     private void showConfirmationDialog(String appName, String packageName) {
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Confirm APK Modification")
-            .setMessage("This will:\n\n" +
-                       "• Extract Minecraft PE APK\n" +
-                       "• Change app name to: " + appName + "\n" +
-                       "• Change package to: " + packageName + "\n" +
-                       "• Replace the app icon\n" +
-                       "• Sign and install the modified APK\n\n" +
-                       "This process may take several minutes. Continue?")
-            .setPositiveButton("Start Modification", (dialog, which) -> {
-                showBottomProgressBar();
-                showProgressDialog();
-                // Start the real APK modification process
-                apkModifier.modifyApk(appName, packageName, selectedIcon);
-            })
-            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-            .setIcon(R.drawable.ic_build)
-            .show();
+        try {
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Confirm APK Modification")
+                .setMessage("This will:\n\n" +
+                           "• Extract Minecraft PE APK\n" +
+                           "• Change app name to: " + appName + "\n" +
+                           "• Change package to: " + packageName + "\n" +
+                           "• Replace the app icon\n" +
+                           "• Sign and install the modified APK\n\n" +
+                           "This process may take several minutes. Continue?")
+                .setPositiveButton("Start Modification", (dialog, which) -> {
+                    try {
+                        showBottomProgressBar();
+                        showProgressDialog();
+                        // Start the real APK modification process
+                        if (apkModifier != null) {
+                            apkModifier.modifyApk(appName, packageName, selectedIcon);
+                        } else {
+                            onError("APK modifier not initialized");
+                        }
+                    } catch (Exception e) {
+                        onError("Failed to start APK modification: " + e.getMessage());
+                    }
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setIcon(R.drawable.ic_build)
+                .show();
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error showing confirmation dialog: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
     
     private boolean isValidPackageName(String packageName) {
@@ -411,7 +474,9 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             .setTitle("Cancel APK Modification?")
             .setMessage("Are you sure you want to cancel the APK modification process? This will stop the current operation.")
             .setPositiveButton("Yes, Cancel", (dialog, which) -> {
-                // TODO: Implement actual cancellation logic in ApkModifier
+                if (apkModifier != null) {
+                    apkModifier.cancelModification();
+                }
                 hideBottomProgressBar();
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
