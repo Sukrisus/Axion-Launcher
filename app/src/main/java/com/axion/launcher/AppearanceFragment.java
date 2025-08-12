@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -49,6 +50,7 @@ public class AppearanceFragment extends Fragment {
     
     private ActivityResultLauncher<String> imagePickerLauncher;
     private ActivityResultLauncher<String> permissionLauncher;
+    private ActivityResultLauncher<String[]> multiplePermissionLauncher;
 
     @Nullable
     @Override
@@ -77,7 +79,26 @@ public class AppearanceFragment extends Fragment {
                 if (isGranted) {
                     openImagePicker();
                 } else {
-                    Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show();
+                    showPermissionDeniedMessage();
+                }
+            }
+        );
+        
+        multiplePermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(),
+            result -> {
+                boolean allGranted = true;
+                for (Boolean granted : result.values()) {
+                    if (!granted) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+                
+                if (allGranted) {
+                    openImagePicker();
+                } else {
+                    showPermissionDeniedMessage();
                 }
             }
         );
@@ -90,16 +111,31 @@ public class AppearanceFragment extends Fragment {
     }
     
     private void selectImage() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) 
-                != PackageManager.PERMISSION_GRANTED) {
-            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ - Use new granular permissions
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+            } else {
+                openImagePicker();
+            }
         } else {
-            openImagePicker();
+            // Android 12 and below - Use legacy permissions
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+            } else {
+                openImagePicker();
+            }
         }
     }
     
     private void openImagePicker() {
-        imagePickerLauncher.launch("image/*");
+        try {
+            imagePickerLauncher.launch("image/*");
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error opening image picker: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
     
     private void handleImageResult(Uri imageUri) {
@@ -207,6 +243,23 @@ public class AppearanceFragment extends Fragment {
             percentage.setText(progress + "%");
             progressBar.setProgress(progress);
         });
+    }
+
+    private void showPermissionDeniedMessage() {
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Permission Required")
+            .setMessage("This app needs access to your photos to select an image for the app icon. Please grant the permission in Settings.")
+            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+            .setNegativeButton("Open Settings", (dialog, which) -> {
+                try {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + requireContext().getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Toast.makeText(requireContext(), "Could not open settings", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .show();
     }
     
 }
