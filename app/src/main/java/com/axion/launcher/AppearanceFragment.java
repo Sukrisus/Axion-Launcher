@@ -1,6 +1,8 @@
 package com.axion.launcher;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +17,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +63,17 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     private TextView progressPercentage;
     private LinearProgressIndicator progressBar;
     
+    // Bottom progress bar components
+    private MaterialCardView bottomProgressCard;
+    private TextView bottomProgressStatus;
+    private TextView bottomProgressPercentage;
+    private LinearProgressIndicator bottomProgressBar;
+    private MaterialButton minimizeButton;
+    private MaterialButton cancelButton;
+    
+    private boolean isProcessing = false;
+    private boolean isMinimized = false;
+    
     private ActivityResultLauncher<String> imagePickerLauncher;
     private ActivityResultLauncher<String> permissionLauncher;
     private ActivityResultLauncher<String[]> multiplePermissionLauncher;
@@ -80,6 +94,15 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         packageNameInput = view.findViewById(R.id.package_name_input);
         changeAppearanceButton = view.findViewById(R.id.change_appearance_button);
         MaterialCardView iconContainer = view.findViewById(R.id.icon_container);
+        
+        // Initialize bottom progress bar components
+        View bottomProgressContainer = view.findViewById(R.id.bottom_progress_container);
+        bottomProgressCard = bottomProgressContainer.findViewById(R.id.progress_card);
+        bottomProgressStatus = bottomProgressContainer.findViewById(R.id.progress_status_text);
+        bottomProgressPercentage = bottomProgressContainer.findViewById(R.id.progress_percentage_text);
+        bottomProgressBar = bottomProgressContainer.findViewById(R.id.bottom_progress_bar);
+        minimizeButton = bottomProgressContainer.findViewById(R.id.minimize_button);
+        cancelButton = bottomProgressContainer.findViewById(R.id.cancel_button);
         
         // Initialize APK modifier
         apkModifier = new ApkModifier(requireContext());
@@ -141,6 +164,18 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         
         // Set up change appearance button
         changeAppearanceButton.setOnClickListener(v -> startApkModification());
+        
+        // Set up bottom progress bar buttons
+        minimizeButton.setOnClickListener(v -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                isMinimized = true;
+            }
+        });
+        
+        cancelButton.setOnClickListener(v -> {
+            showCancelConfirmation();
+        });
     }
     
     private void selectImage() {
@@ -274,6 +309,7 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
                        "• Sign and install the modified APK\n\n" +
                        "This process may take several minutes. Continue?")
             .setPositiveButton("Start Modification", (dialog, which) -> {
+                showBottomProgressBar();
                 showProgressDialog();
                 // Start the real APK modification process
                 apkModifier.modifyApk(appName, packageName, selectedIcon);
@@ -320,7 +356,42 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         return true;
     }
     
+    private void showBottomProgressBar() {
+        isProcessing = true;
+        isMinimized = false;
+        
+        // Show bottom progress bar with animation
+        bottomProgressCard.setVisibility(View.VISIBLE);
+        bottomProgressCard.setTranslationY(bottomProgressCard.getHeight());
+        bottomProgressCard.animate()
+                .translationY(0)
+                .setDuration(300)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        
+        // Reset progress
+        bottomProgressBar.setProgress(0);
+        bottomProgressPercentage.setText("0%");
+        bottomProgressStatus.setText("Preparing...");
+    }
+    
+    private void hideBottomProgressBar() {
+        if (!isProcessing) return;
+        
+        isProcessing = false;
+        
+        // Hide bottom progress bar with animation
+        bottomProgressCard.animate()
+                .translationY(bottomProgressCard.getHeight())
+                .setDuration(300)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .withEndAction(() -> bottomProgressCard.setVisibility(View.GONE))
+                .start();
+    }
+    
     private void showProgressDialog() {
+        if (isMinimized) return;
+        
         View progressView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_progress, null);
         progressStatus = progressView.findViewById(R.id.progress_status);
         progressPercentage = progressView.findViewById(R.id.progress_percentage);
@@ -335,19 +406,68 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         progressDialog.show();
     }
     
+    private void showCancelConfirmation() {
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Cancel APK Modification?")
+            .setMessage("Are you sure you want to cancel the APK modification process? This will stop the current operation.")
+            .setPositiveButton("Yes, Cancel", (dialog, which) -> {
+                // TODO: Implement actual cancellation logic in ApkModifier
+                hideBottomProgressBar();
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                Toast.makeText(requireContext(), "APK modification cancelled", Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("Continue", (dialog, which) -> dialog.dismiss())
+            .setIcon(R.drawable.ic_error)
+            .show();
+    }
+    
+    private void animateProgressBar(int targetProgress) {
+        if (bottomProgressBar != null) {
+            ValueAnimator animator = ValueAnimator.ofInt(bottomProgressBar.getProgress(), targetProgress);
+            animator.setDuration(200);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.addUpdateListener(animation -> {
+                int progress = (int) animation.getAnimatedValue();
+                bottomProgressBar.setProgress(progress);
+            });
+            animator.start();
+        }
+        
+        if (progressBar != null) {
+            ValueAnimator animator = ValueAnimator.ofInt(progressBar.getProgress(), targetProgress);
+            animator.setDuration(200);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.addUpdateListener(animation -> {
+                int progress = (int) animation.getAnimatedValue();
+                progressBar.setProgress(progress);
+            });
+            animator.start();
+        }
+    }
+    
     // ApkModifier.ProgressCallback implementation
     @Override
     public void onProgress(String status, int progress) {
         requireActivity().runOnUiThread(() -> {
+            // Update dialog progress if visible
             if (progressStatus != null) progressStatus.setText(status);
             if (progressPercentage != null) progressPercentage.setText(progress + "%");
-            if (progressBar != null) progressBar.setProgress(progress);
+            if (progressBar != null) animateProgressBar(progress);
+            
+            // Update bottom progress bar
+            if (bottomProgressStatus != null) bottomProgressStatus.setText(status);
+            if (bottomProgressPercentage != null) bottomProgressPercentage.setText(progress + "%");
+            if (bottomProgressBar != null) animateProgressBar(progress);
         });
     }
     
     @Override
     public void onSuccess(String apkPath) {
         requireActivity().runOnUiThread(() -> {
+            hideBottomProgressBar();
+            
             if (progressDialog != null && progressDialog.isShowing()) {
                 progressDialog.dismiss();
             }
@@ -370,6 +490,8 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     @Override
     public void onError(String error) {
         requireActivity().runOnUiThread(() -> {
+            hideBottomProgressBar();
+            
             if (progressDialog != null && progressDialog.isShowing()) {
                 progressDialog.dismiss();
             }
