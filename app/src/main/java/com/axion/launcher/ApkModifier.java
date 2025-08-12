@@ -51,6 +51,7 @@ public class ApkModifier {
         }
         
         currentTask = executorService.submit(() -> {
+            String extractedApkPath = null;
             try {
                 // Step 1: Check if MCPE is installed
                 updateProgress("Checking Minecraft PE installation...", 5);
@@ -68,22 +69,25 @@ public class ApkModifier {
                 
                 // Step 3: Extract APK
                 updateProgress("Extracting Minecraft PE APK...", 20);
-                String originalApkPath = extractApk(MCPE_PACKAGE);
-                if (originalApkPath == null) {
+                extractedApkPath = extractApk(MCPE_PACKAGE);
+                if (extractedApkPath == null) {
                     onError("Failed to extract Minecraft PE APK");
                     return;
                 }
                 
                 // Step 4: Install APK using system installer
                 updateProgress("Installing Minecraft PE...", 80);
-                installApk(originalApkPath);
+                installApk(extractedApkPath);
                 
                 updateProgress("Complete!", 100);
-                onSuccess(originalApkPath);
+                onSuccess(extractedApkPath);
                 
             } catch (Exception e) {
                 Log.e(TAG, "Error in APK installation process", e);
                 onError("Error: " + e.getMessage());
+            } finally {
+                // Clean up temporary files on error or completion
+                cleanupTempFiles();
             }
         });
     }
@@ -92,6 +96,9 @@ public class ApkModifier {
         if (currentTask != null && !currentTask.isDone()) {
             currentTask.cancel(true);
             Log.d(TAG, "APK installation cancelled by user");
+            
+            // Clean up temporary files when cancelled
+            cleanupTempFiles();
             
             if (progressCallback != null) {
                 progressCallback.onError("APK installation cancelled");
@@ -110,6 +117,8 @@ public class ApkModifier {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();
         }
+        // Clean up temporary files on shutdown
+        cleanupTempFiles();
     }
     
     private boolean isPackageInstalled(String packageName) {
@@ -117,6 +126,44 @@ public class ApkModifier {
             context.getPackageManager().getPackageInfo(packageName, 0);
             return true;
         } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+    
+    private boolean validateApkFile(String apkPath) {
+        try {
+            File apkFile = new File(apkPath);
+            if (!apkFile.exists() || !apkFile.canRead()) {
+                return false;
+            }
+            
+            // Check if it's a valid ZIP file (APK is a ZIP file)
+            try (ZipFile zipFile = new ZipFile(apkFile)) {
+                // Check for essential APK files
+                boolean hasManifest = zipFile.getEntry("AndroidManifest.xml") != null;
+                boolean hasResources = zipFile.getEntry("resources.arsc") != null;
+                boolean hasClasses = zipFile.getEntry("classes.dex") != null;
+                
+                if (!hasManifest) {
+                    Log.e(TAG, "APK validation failed: Missing AndroidManifest.xml");
+                    return false;
+                }
+                
+                if (!hasResources) {
+                    Log.w(TAG, "APK validation warning: Missing resources.arsc");
+                }
+                
+                if (!hasClasses) {
+                    Log.w(TAG, "APK validation warning: Missing classes.dex");
+                }
+                
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "APK validation failed: Not a valid ZIP file", e);
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error validating APK file", e);
             return false;
         }
     }
@@ -131,6 +178,17 @@ public class ApkModifier {
             File sourceFile = new File(sourceDir);
             if (!sourceFile.exists()) {
                 Log.e(TAG, "Source APK file does not exist: " + sourceDir);
+                return null;
+            }
+            
+            if (!sourceFile.canRead()) {
+                Log.e(TAG, "Source APK file is not readable: " + sourceDir);
+                return null;
+            }
+            
+            // Validate the source APK
+            if (!validateApkFile(sourceDir)) {
+                Log.e(TAG, "Source APK is not valid: " + sourceDir);
                 return null;
             }
             
@@ -163,11 +221,30 @@ public class ApkModifier {
                         updateProgress("Extracting APK... " + (progress * 100 / 50) + "%", 20 + progress);
                     }
                 }
+            } catch (IOException e) {
+                Log.e(TAG, "Error copying APK file", e);
+                // Clean up partial file
+                if (outputFile.exists()) {
+                    outputFile.delete();
+                }
+                return null;
             }
             
             // Verify the copied file
             if (!outputFile.exists() || outputFile.length() != totalBytes) {
                 Log.e(TAG, "APK extraction failed - file size mismatch");
+                if (outputFile.exists()) {
+                    outputFile.delete();
+                }
+                return null;
+            }
+            
+            // Validate the copied APK
+            if (!validateApkFile(outputFile.getAbsolutePath())) {
+                Log.e(TAG, "Copied APK is not valid");
+                if (outputFile.exists()) {
+                    outputFile.delete();
+                }
                 return null;
             }
             
@@ -196,6 +273,14 @@ public class ApkModifier {
                 return;
             }
             
+            // Check file size
+            long fileSize = apkFile.length();
+            if (fileSize == 0) {
+                Log.e(TAG, "APK file is empty: " + apkPath);
+                onError("APK file is empty or corrupted");
+                return;
+            }
+            
             Uri apkUri = FileProvider.getUriForFile(context, 
                 context.getPackageName() + ".fileprovider", apkFile);
             
@@ -210,13 +295,18 @@ public class ApkModifier {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             
+            // For Android 7.0+, add additional flags
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            }
+            
             // Verify that there's an app to handle this intent
             if (intent.resolveActivity(context.getPackageManager()) != null) {
                 context.startActivity(intent);
                 Log.d(TAG, "APK installation intent started successfully");
             } else {
                 Log.e(TAG, "No app found to handle APK installation");
-                onError("No app found to install APK. Please enable 'Install unknown apps' in settings.");
+                onError("No package installer found. Please enable 'Install unknown apps' in settings.");
             }
             
         } catch (Exception e) {
@@ -250,10 +340,50 @@ public class ApkModifier {
             intent.setDataAndType(Uri.parse("file://test.apk"), "application/vnd.android.package-archive");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             
-            return intent.resolveActivity(context.getPackageManager()) != null;
+            // Check if there's an app to handle this intent
+            boolean hasInstaller = intent.resolveActivity(context.getPackageManager()) != null;
+            
+            if (!hasInstaller) {
+                Log.w(TAG, "No package installer found");
+                return false;
+            }
+            
+            // For Android 8.0+, check if we can request install packages
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                PackageManager pm = context.getPackageManager();
+                if (!pm.canRequestPackageInstalls()) {
+                    Log.w(TAG, "Cannot request package installs");
+                    return false;
+                }
+            }
+            
+            return true;
         } catch (Exception e) {
             Log.w(TAG, "Error checking install permissions", e);
             return false;
+        }
+    }
+
+    private void cleanupTempFiles() {
+        try {
+            File extractedDir = new File(context.getExternalFilesDir(null), "extracted");
+            if (extractedDir.exists()) {
+                File[] files = extractedDir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            if (!file.delete()) {
+                                Log.w(TAG, "Failed to delete temporary file: " + file.getAbsolutePath());
+                            }
+                        }
+                    }
+                }
+                if (!extractedDir.delete()) {
+                    Log.w(TAG, "Failed to delete temporary directory: " + extractedDir.getAbsolutePath());
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error cleaning up temporary files", e);
         }
     }
 }

@@ -44,6 +44,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
+import android.util.Log;
 
 public class AppearanceFragment extends Fragment implements ApkModifier.ProgressCallback {
 
@@ -218,6 +219,12 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             progressDialog.dismiss();
         }
         
+        // Clean up bitmap to prevent memory leaks
+        if (selectedIcon != null && !selectedIcon.isRecycled()) {
+            selectedIcon.recycle();
+            selectedIcon = null;
+        }
+        
         // Don't shutdown the ApkModifier here as it's shared with MainActivity
         // Just remove the callback
         if (apkModifier != null) {
@@ -274,10 +281,32 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         if (imageUri != null) {
             try {
                 InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+                if (inputStream == null) {
+                    Toast.makeText(requireContext(), "Error reading image file", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                // Recycle previous bitmap to prevent memory leaks
+                if (selectedIcon != null && !selectedIcon.isRecycled()) {
+                    selectedIcon.recycle();
+                }
+                
                 selectedIcon = BitmapFactory.decodeStream(inputStream);
+                inputStream.close();
+                
+                if (selectedIcon == null) {
+                    Toast.makeText(requireContext(), "Error decoding image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 
                 // Resize to 512x512 for app icon
-                selectedIcon = Bitmap.createScaledBitmap(selectedIcon, 512, 512, true);
+                Bitmap resizedIcon = Bitmap.createScaledBitmap(selectedIcon, 512, 512, true);
+                
+                // Recycle the original bitmap
+                if (selectedIcon != resizedIcon) {
+                    selectedIcon.recycle();
+                }
+                selectedIcon = resizedIcon;
                 
                 appIcon.setImageBitmap(selectedIcon);
                 appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -286,7 +315,8 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
                 saveIconToInternalStorage(selectedIcon);
                 
             } catch (Exception e) {
-                Toast.makeText(requireContext(), "Error loading image", Toast.LENGTH_SHORT).show();
+                Log.e("AppearanceFragment", "Error loading image", e);
+                Toast.makeText(requireContext(), "Error loading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -299,7 +329,8 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
             fos.close();
             selectedIconPath = iconFile.getAbsolutePath();
         } catch (IOException e) {
-            Toast.makeText(requireContext(), "Error saving icon", Toast.LENGTH_SHORT).show();
+            Log.e("AppearanceFragment", "Error saving icon", e);
+            Toast.makeText(requireContext(), "Error saving icon: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -548,26 +579,42 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     }
     
     private void animateProgressBar(int targetProgress) {
-        if (bottomProgressBar != null) {
-            ValueAnimator animator = ValueAnimator.ofInt(bottomProgressBar.getProgress(), targetProgress);
-            animator.setDuration(200);
-            animator.setInterpolator(new AccelerateDecelerateInterpolator());
-            animator.addUpdateListener(animation -> {
-                int progress = (int) animation.getAnimatedValue();
-                bottomProgressBar.setProgress(progress);
-            });
-            animator.start();
-        }
-        
-        if (progressBar != null) {
-            ValueAnimator animator = ValueAnimator.ofInt(progressBar.getProgress(), targetProgress);
-            animator.setDuration(200);
-            animator.setInterpolator(new AccelerateDecelerateInterpolator());
-            animator.addUpdateListener(animation -> {
-                int progress = (int) animation.getAnimatedValue();
-                progressBar.setProgress(progress);
-            });
-            animator.start();
+        try {
+            if (bottomProgressBar != null) {
+                ValueAnimator animator = ValueAnimator.ofInt(bottomProgressBar.getProgress(), targetProgress);
+                animator.setDuration(200);
+                animator.setInterpolator(new AccelerateDecelerateInterpolator());
+                animator.addUpdateListener(animation -> {
+                    try {
+                        int progress = (int) animation.getAnimatedValue();
+                        if (bottomProgressBar != null) {
+                            bottomProgressBar.setProgress(progress);
+                        }
+                    } catch (Exception e) {
+                        Log.w("AppearanceFragment", "Error updating bottom progress bar", e);
+                    }
+                });
+                animator.start();
+            }
+            
+            if (progressBar != null) {
+                ValueAnimator animator = ValueAnimator.ofInt(progressBar.getProgress(), targetProgress);
+                animator.setDuration(200);
+                animator.setInterpolator(new AccelerateDecelerateInterpolator());
+                animator.addUpdateListener(animation -> {
+                    try {
+                        int progress = (int) animation.getAnimatedValue();
+                        if (progressBar != null) {
+                            progressBar.setProgress(progress);
+                        }
+                    } catch (Exception e) {
+                        Log.w("AppearanceFragment", "Error updating progress bar", e);
+                    }
+                });
+                animator.start();
+            }
+        } catch (Exception e) {
+            Log.w("AppearanceFragment", "Error animating progress bar", e);
         }
     }
     
@@ -579,20 +626,36 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         }
         
         requireActivity().runOnUiThread(() -> {
-            // Check if fragment is still attached after the delay
-            if (!isAdded() || getActivity() == null) {
-                return;
+            try {
+                // Check if fragment is still attached after the delay
+                if (!isAdded() || getActivity() == null) {
+                    return;
+                }
+                
+                // Update dialog progress if visible
+                if (progressStatus != null) {
+                    progressStatus.setText(status != null ? status : "Processing...");
+                }
+                if (progressPercentage != null) {
+                    progressPercentage.setText(progress + "%");
+                }
+                if (progressBar != null) {
+                    animateProgressBar(progress);
+                }
+                
+                // Update bottom progress bar
+                if (bottomProgressStatus != null) {
+                    bottomProgressStatus.setText(status != null ? status : "Processing...");
+                }
+                if (bottomProgressPercentage != null) {
+                    bottomProgressPercentage.setText(progress + "%");
+                }
+                if (bottomProgressBar != null) {
+                    animateProgressBar(progress);
+                }
+            } catch (Exception e) {
+                Log.w("AppearanceFragment", "Error updating progress", e);
             }
-            
-            // Update dialog progress if visible
-            if (progressStatus != null) progressStatus.setText(status);
-            if (progressPercentage != null) progressPercentage.setText(progress + "%");
-            if (progressBar != null) animateProgressBar(progress);
-            
-            // Update bottom progress bar
-            if (bottomProgressStatus != null) bottomProgressStatus.setText(status);
-            if (bottomProgressPercentage != null) bottomProgressPercentage.setText(progress + "%");
-            if (bottomProgressBar != null) animateProgressBar(progress);
         });
     }
     
@@ -603,25 +666,30 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         }
         
         requireActivity().runOnUiThread(() -> {
-            // Check if fragment is still attached after the delay
-            if (!isAdded() || getActivity() == null) {
-                return;
+            try {
+                // Check if fragment is still attached after the delay
+                if (!isAdded() || getActivity() == null) {
+                    return;
+                }
+                
+                hideBottomProgressBar();
+                
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                
+                new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Success!")
+                    .setMessage("Minecraft PE APK has been extracted and the installation dialog should appear!\n\n" +
+                               "The system package installer will now guide you through the installation process.\n\n" +
+                               "This will create a copy of Minecraft PE that can be installed alongside your existing version.")
+                    .setPositiveButton("Great!", (dialog, which) -> dialog.dismiss())
+                    .setIcon(R.drawable.ic_check_circle)
+                    .show();
+            } catch (Exception e) {
+                Log.e("AppearanceFragment", "Error showing success dialog", e);
+                Toast.makeText(requireContext(), "Success! Installation dialog should appear.", Toast.LENGTH_LONG).show();
             }
-            
-            hideBottomProgressBar();
-            
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Success!")
-                .setMessage("Minecraft PE APK has been extracted and the installation dialog should appear!\n\n" +
-                           "The system package installer will now guide you through the installation process.\n\n" +
-                           "This will create a copy of Minecraft PE that can be installed alongside your existing version.")
-                .setPositiveButton("Great!", (dialog, which) -> dialog.dismiss())
-                .setIcon(R.drawable.ic_check_circle)
-                .show();
         });
     }
     
@@ -632,27 +700,32 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
         }
         
         requireActivity().runOnUiThread(() -> {
-            // Check if fragment is still attached after the delay
-            if (!isAdded() || getActivity() == null) {
-                return;
+            try {
+                // Check if fragment is still attached after the delay
+                if (!isAdded() || getActivity() == null) {
+                    return;
+                }
+                
+                hideBottomProgressBar();
+                
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                
+                new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Error")
+                    .setMessage("Failed to install Minecraft PE:\n\n" + (error != null ? error : "Unknown error") + "\n\n" +
+                               "Please make sure:\n" +
+                               "• Minecraft PE is installed on your device\n" +
+                               "• You have enabled 'Install unknown apps' in settings\n" +
+                               "• You have granted necessary permissions")
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .setIcon(R.drawable.ic_error)
+                    .show();
+            } catch (Exception e) {
+                Log.e("AppearanceFragment", "Error showing error dialog", e);
+                Toast.makeText(requireContext(), "Error: " + (error != null ? error : "Unknown error"), Toast.LENGTH_LONG).show();
             }
-            
-            hideBottomProgressBar();
-            
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Error")
-                .setMessage("Failed to install Minecraft PE:\n\n" + error + "\n\n" +
-                           "Please make sure:\n" +
-                           "• Minecraft PE is installed on your device\n" +
-                           "• You have enabled 'Install unknown apps' in settings\n" +
-                           "• You have granted necessary permissions")
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .setIcon(R.drawable.ic_error)
-                .show();
         });
     }
 }
