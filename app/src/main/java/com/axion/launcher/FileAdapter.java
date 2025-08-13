@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder> {
@@ -46,7 +47,11 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
     }
 
     public void updateFiles(List<ResourceFile> newFiles) {
-        this.files = newFiles;
+        if (newFiles == null) {
+            this.files = new ArrayList<>();
+        } else {
+            this.files = new ArrayList<>(newFiles);
+        }
         notifyDataSetChanged();
     }
 
@@ -63,20 +68,30 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder
         }
 
         public void bind(ResourceFile resourceFile) {
-            fileName.setText(resourceFile.getName());
+            if (resourceFile == null) {
+                return;
+            }
             
-            String details = "Downloaded on " + resourceFile.getFormattedDate() + 
-                           " • " + resourceFile.getFormattedSize();
-            fileDetails.setText(details);
+            if (fileName != null) {
+                fileName.setText(resourceFile.getName());
+            }
+            
+            if (fileDetails != null) {
+                String details = "Downloaded on " + resourceFile.getFormattedDate() + 
+                               " • " + resourceFile.getFormattedSize();
+                fileDetails.setText(details);
+            }
 
             // Set button enabled/disabled based on file type
-            shareButton.setEnabled(resourceFile.isMinecraftFile());
+            if (shareButton != null) {
+                shareButton.setEnabled(resourceFile.isMinecraftFile());
 
-            shareButton.setOnClickListener(v -> {
-                if (actionListener != null) {
-                    actionListener.onFileAction(resourceFile);
-                }
-            });
+                shareButton.setOnClickListener(v -> {
+                    if (actionListener != null && resourceFile != null) {
+                        actionListener.onFileAction(resourceFile);
+                    }
+                });
+            }
         }
     }
 }

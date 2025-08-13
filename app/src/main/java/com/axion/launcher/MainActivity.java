@@ -154,15 +154,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void handleIncomingIntent(Intent intent) {
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            Uri data = intent.getData();
-            if (data != null) {
-                String mimeType = intent.getType();
-                if (mimeType != null) {
-                    saveMinecraftFile(data, mimeType);
+        if (intent == null) {
+            return;
+        }
+        
+        try {
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri data = intent.getData();
+                if (data != null) {
+                    String mimeType = intent.getType();
+                    if (mimeType != null) {
+                        saveMinecraftFile(data, mimeType);
+                    } else {
+                        // Try to determine MIME type from file extension
+                        String fileName = getFileNameFromUri(data);
+                        if (fileName != null) {
+                            String mimeTypeFromExtension = getMimeTypeFromExtension(fileName);
+                            if (mimeTypeFromExtension != null) {
+                                saveMinecraftFile(data, mimeTypeFromExtension);
+                            }
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "Error handling incoming intent", e);
+            Toast.makeText(this, "Error processing file: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private String getMimeTypeFromExtension(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+        
+        String lowerFileName = fileName.toLowerCase();
+        if (lowerFileName.endsWith(".mcpack")) {
+            return "application/minecraft-pack";
+        } else if (lowerFileName.endsWith(".mcaddon")) {
+            return "application/minecraft-addon";
+        } else if (lowerFileName.endsWith(".mctemplate")) {
+            return "application/minecraft-template";
+        } else if (lowerFileName.endsWith(".mcpack.zip")) {
+            return "application/minecraft-pack";
+        } else if (lowerFileName.endsWith(".mcaddon.zip")) {
+            return "application/minecraft-addon";
+        } else if (lowerFileName.endsWith(".mctemplate.zip")) {
+            return "application/minecraft-template";
+        }
+        
+        return null;
     }
 
     private void saveMinecraftFile(Uri fileUri, String mimeType) {

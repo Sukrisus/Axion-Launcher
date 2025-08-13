@@ -83,6 +83,11 @@ public class FileListFragment extends Fragment {
 
     private void loadFiles() {
         try {
+            if (getContext() == null) {
+                Log.w(TAG, "Context is null, cannot load files");
+                return;
+            }
+            
             File baseDir = new File(Environment.getExternalStorageDirectory(), "axion/files/resources");
             File sectionDir = new File(baseDir, section);
             
@@ -92,8 +97,12 @@ public class FileListFragment extends Fragment {
                 File[] fileArray = sectionDir.listFiles();
                 if (fileArray != null) {
                     for (File file : fileArray) {
-                        if (file.isFile()) {
-                            allFiles.add(new ResourceFile(file, section));
+                        if (file != null && file.isFile() && file.exists()) {
+                            try {
+                                allFiles.add(new ResourceFile(file, section));
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error creating ResourceFile for: " + file.getAbsolutePath(), e);
+                            }
                         }
                     }
                 }
@@ -102,7 +111,9 @@ public class FileListFragment extends Fragment {
             // Sort files by last modified date (newest first)
             Collections.sort(allFiles, (f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
             
-            adapter.updateFiles(allFiles);
+            if (adapter != null) {
+                adapter.updateFiles(allFiles);
+            }
             updateEmptyState(allFiles.isEmpty());
             updateUniversalOpenButton();
             
@@ -113,6 +124,10 @@ public class FileListFragment extends Fragment {
     }
 
     private void updateEmptyState(boolean isEmpty) {
+        if (recyclerView == null || emptyState == null) {
+            return;
+        }
+        
         if (isEmpty) {
             recyclerView.setVisibility(View.GONE);
             emptyState.setVisibility(View.VISIBLE);
@@ -123,6 +138,10 @@ public class FileListFragment extends Fragment {
     }
 
     private void updateUniversalOpenButton() {
+        if (universalOpenButton == null || allFiles == null) {
+            return;
+        }
+        
         boolean hasMinecraftFiles = allFiles.stream().anyMatch(ResourceFile::isMinecraftFile);
         universalOpenButton.setEnabled(hasMinecraftFiles);
     }

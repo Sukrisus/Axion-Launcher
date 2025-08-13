@@ -1,7 +1,10 @@
 package com.axion.launcher;
 
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,7 +25,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
-import android.content.Intent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SlimSkinPackCompilerWebViewFragment extends Fragment {
 
@@ -30,6 +34,9 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
     
     private WebView webView;
     private ImageButton backButton;
+    
+    // Track broadcast receivers to prevent memory leaks
+    private List<BroadcastReceiver> registeredReceivers = new ArrayList<>();
 
     @Nullable
     @Override
@@ -126,7 +133,7 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
 
     private void setupDownloadCompleteReceiver(DownloadManager dm, long downloadId, String fileName) {
         // Create a broadcast receiver to handle download completion
-        android.content.BroadcastReceiver downloadReceiver = new android.content.BroadcastReceiver() {
+        BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
@@ -168,9 +175,12 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
                         Log.e(TAG, "Error moving downloaded file", e);
                         Toast.makeText(requireContext(), "Error moving file: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     } finally {
-                        // Unregister the receiver
+                        // Unregister this receiver
                         try {
-                            requireContext().unregisterReceiver(this);
+                            if (requireContext() != null) {
+                                requireContext().unregisterReceiver(this);
+                                registeredReceivers.remove(this);
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error unregistering receiver", e);
                         }
@@ -179,8 +189,13 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
             }
         };
         
-        // Register the receiver
-        requireContext().registerReceiver(downloadReceiver, new android.content.IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        // Register the receiver and track it
+        try {
+            requireContext().registerReceiver(downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            registeredReceivers.add(downloadReceiver);
+        } catch (Exception e) {
+            Log.e(TAG, "Error registering download receiver", e);
+        }
     }
 
     private String getFileNameFromUrl(String url, String contentDisposition) {
@@ -229,8 +244,25 @@ public class SlimSkinPackCompilerWebViewFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        
+        // Clean up WebView
         if (webView != null) {
             webView.destroy();
+            webView = null;
+        }
+        
+        // Clean up all registered broadcast receivers to prevent memory leaks
+        if (registeredReceivers != null) {
+            for (BroadcastReceiver receiver : registeredReceivers) {
+                try {
+                    if (requireContext() != null) {
+                        requireContext().unregisterReceiver(receiver);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error unregistering receiver in onDestroyView", e);
+                }
+            }
+            registeredReceivers.clear();
         }
     }
 }

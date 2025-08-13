@@ -14,8 +14,12 @@ public class ResourceFile {
     private String section; // "mods", "textures", or "maps"
 
     public ResourceFile(File file, String section) {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        
         this.file = file;
-        this.section = section;
+        this.section = section != null ? section : "unknown";
         this.name = file.getName();
         this.extension = getFileExtension(file.getName());
         this.size = file.length();
@@ -23,8 +27,12 @@ public class ResourceFile {
     }
 
     private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        
         int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex > 0) {
+        if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
             return fileName.substring(lastDotIndex).toLowerCase();
         }
         return "";
@@ -55,6 +63,10 @@ public class ResourceFile {
     }
 
     public String getFormattedSize() {
+        if (size < 0) {
+            return "Unknown";
+        }
+        
         if (size < 1024) {
             return size + " B";
         } else if (size < 1024 * 1024) {
@@ -65,8 +77,16 @@ public class ResourceFile {
     }
 
     public String getFormattedDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-        return sdf.format(new Date(lastModified));
+        if (lastModified <= 0) {
+            return "Unknown";
+        }
+        
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            return sdf.format(new Date(lastModified));
+        } catch (Exception e) {
+            return "Unknown";
+        }
     }
 
     public boolean isMinecraftFile() {
