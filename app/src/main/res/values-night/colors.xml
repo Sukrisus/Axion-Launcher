@@ -2,15 +2,26 @@
 <resources>
     <!-- Material You 3 Color Palette - Dark Theme -->
     <color name="primary_color">#D0BCFF</color>
+    <color name="primary">#D0BCFF</color>
     <color name="primary_dark">#B69DF8</color>
-    <color name="primary_light">#E8DEF8</color>
-    <color name="accent_color">#CAC4D0</color>
+    <color name="primary_light">#F4EFFF</color>
+    <color name="primary_container">#4F378B</color>
+    <color name="accent_color">#CCC2DC</color>
+    
+    <!-- Material You 3 Secondary Colors -->
+    <color name="secondary">#CCC2DC</color>
+    <color name="secondary_container">#4A4458</color>
+    
+    <!-- Material You 3 Tertiary Colors -->
+    <color name="tertiary">#EFB8C8</color>
+    <color name="tertiary_container">#633B48</color>
     
     <!-- Material You 3 Surface Colors -->
     <color name="surface_color">#1C1B1F</color>
     <color name="surface_variant">#49454F</color>
-    <color name="surface_bright">#2B2930</color>
+    <color name="surface_bright">#E6E1E5</color>
     <color name="surface_dim">#141218</color>
+    <color name="surface_container_high">#2B2930</color>
     
     <!-- Material You 3 Text Colors -->
     <color name="primary_text_color">#E6E1E5</color>
@@ -18,16 +29,17 @@
     <color name="tertiary_text_color">#938F99</color>
     <color name="text_on_primary">#381E72</color>
     <color name="text_on_surface">#E6E1E5</color>
+    <color name="text_on_surface_variant">#CAC4D0</color>
     
     <!-- Material You 3 Background Colors -->
-    <color name="background_color">#141218</color>
+    <color name="background_color">#1C1B1F</color>
     <color name="card_background">#1C1B1F</color>
     <color name="card_background_variant">#2B2930</color>
     
     <!-- Material You 3 Status Colors -->
-    <color name="success_color">#9CCC65</color>
-    <color name="error_color">#F2B8B5</color>
-    <color name="warning_color">#FDDC22</color>
+    <color name="success_color">#4CAF50</color>
+    <color name="error_color">#F44336</color>
+    <color name="warning_color">#FF9800</color>
     
     <!-- Material You 3 Outline Colors -->
     <color name="outline_color">#938F99</color>

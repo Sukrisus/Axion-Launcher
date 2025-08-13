@@ -1,84 +1,26 @@
 package com.axion.launcher;
 
-import android.Manifest;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.RadioButton;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.textfield.TextInputEditText;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Pattern;
-import android.util.Log;
+public class AppearanceFragment extends Fragment {
 
-public class AppearanceFragment extends Fragment implements ApkModifier.ProgressCallback {
-
-    private static final int PERMISSION_REQUEST_CODE = 2;
-    private static final String DEFAULT_PACKAGE_NAME = "com.mojang.minecraftpe";
-    
-    private ImageView appIcon;
-    private TextInputEditText appNameInput;
-    private TextInputEditText packageNameInput;
-    private MaterialButton changeAppearanceButton;
-    private Bitmap selectedIcon;
-    private String selectedIconPath;
-    
-    private ApkModifier apkModifier;
-    private AlertDialog progressDialog;
-    private TextView progressStatus;
-    private TextView progressPercentage;
-    private LinearProgressIndicator progressBar;
-    
-    // Bottom progress bar components
-    private MaterialCardView bottomProgressCard;
-    private TextView bottomProgressStatus;
-    private TextView bottomProgressPercentage;
-    private LinearProgressIndicator bottomProgressBar;
-    private MaterialButton minimizeButton;
-    private MaterialButton cancelButton;
-    
-    private boolean isProcessing = false;
-    private boolean isMinimized = false;
-    
-    private ActivityResultLauncher<String> imagePickerLauncher;
-    private ActivityResultLauncher<String> permissionLauncher;
-    private ActivityResultLauncher<String[]> multiplePermissionLauncher;
-    private ActivityResultLauncher<Intent> installLauncher;
+    private MaterialCardView lightModeCard;
+    private MaterialCardView darkModeCard;
+    private MaterialCardView amoledModeCard;
+    private RadioButton lightModeRadio;
+    private RadioButton darkModeRadio;
+    private RadioButton amoledModeRadio;
+    private ThemeManager themeManager;
 
     @Nullable
     @Override
@@ -90,642 +32,98 @@ public class AppearanceFragment extends Fragment implements ApkModifier.Progress
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        appIcon = view.findViewById(R.id.app_icon);
-        appNameInput = view.findViewById(R.id.app_name_input);
-        packageNameInput = view.findViewById(R.id.package_name_input);
-        changeAppearanceButton = view.findViewById(R.id.change_appearance_button);
-        MaterialCardView iconContainer = view.findViewById(R.id.icon_container);
+        // Initialize ThemeManager
+        themeManager = ThemeManager.getInstance(requireContext());
         
-        // Initialize bottom progress bar components
-        View bottomProgressContainer = view.findViewById(R.id.bottom_progress_container);
-        bottomProgressCard = bottomProgressContainer.findViewById(R.id.progress_card);
-        bottomProgressStatus = bottomProgressContainer.findViewById(R.id.progress_status_text);
-        bottomProgressPercentage = bottomProgressContainer.findViewById(R.id.progress_percentage_text);
-        bottomProgressBar = bottomProgressContainer.findViewById(R.id.bottom_progress_bar);
-        minimizeButton = bottomProgressContainer.findViewById(R.id.minimize_button);
-        cancelButton = bottomProgressContainer.findViewById(R.id.cancel_button);
+        // Initialize views
+        lightModeCard = view.findViewById(R.id.light_mode_card);
+        darkModeCard = view.findViewById(R.id.dark_mode_card);
+        amoledModeCard = view.findViewById(R.id.amoled_mode_card);
+        lightModeRadio = view.findViewById(R.id.light_mode_radio);
+        darkModeRadio = view.findViewById(R.id.dark_mode_radio);
+        amoledModeRadio = view.findViewById(R.id.amoled_mode_radio);
         
-        // Initialize APK modifier from MainActivity or create new one
-        if (getActivity() instanceof MainActivity) {
-            apkModifier = ((MainActivity) getActivity()).getApkModifier();
-        } else {
-            apkModifier = new ApkModifier(requireContext());
-        }
-        apkModifier.setProgressCallback(this);
+        // Set up click listeners
+        setupClickListeners();
         
-        // Set default package name
-        packageNameInput.setText(DEFAULT_PACKAGE_NAME);
-        
-        // Register activity result launchers
-        imagePickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            this::handleImageResult
-        );
-        
-        permissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    openImagePicker();
-                } else {
-                    showPermissionDeniedMessage();
-                }
-            }
-        );
-        
-        multiplePermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestMultiplePermissions(),
-            result -> {
-                boolean allGranted = true;
-                for (Boolean granted : result.values()) {
-                    if (!granted) {
-                        allGranted = false;
-                        break;
-                    }
-                }
-                
-                if (allGranted) {
-                    openImagePicker();
-                } else {
-                    showPermissionDeniedMessage();
-                }
-            }
-        );
-        
-        // Install launcher for APK installation
-        installLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Toast.makeText(requireContext(), "APK installed successfully!", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(requireContext(), "Installation cancelled or failed", Toast.LENGTH_SHORT).show();
-                }
-            }
-        );
-        
-        // Set up icon selection
-        iconContainer.setOnClickListener(v -> selectImage());
-        
-        // Set up change appearance button
-        changeAppearanceButton.setOnClickListener(v -> startApkModification());
-        
-        // Set up bottom progress bar buttons
-        minimizeButton.setOnClickListener(v -> {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-                isMinimized = true;
+        // Set current theme selection
+        updateThemeSelection();
+    }
+
+    private void setupClickListeners() {
+        lightModeCard.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_LIGHT, activity, activity.findViewById(android.R.id.content));
             }
         });
-        
-        cancelButton.setOnClickListener(v -> {
-            showCancelConfirmation();
+
+        darkModeCard.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_DARK, activity, activity.findViewById(android.R.id.content));
+            }
         });
-    }
-    
-    @Override
-    public void onPause() {
-        super.onPause();
-        // Pause any ongoing operations if needed
-        if (apkModifier != null && isProcessing) {
-            // Don't shutdown here, just pause the UI updates
-        }
-    }
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // Clean up view references to prevent memory leaks
-        appIcon = null;
-        appNameInput = null;
-        packageNameInput = null;
-        changeAppearanceButton = null;
-        bottomProgressCard = null;
-        bottomProgressStatus = null;
-        bottomProgressPercentage = null;
-        bottomProgressBar = null;
-        minimizeButton = null;
-        cancelButton = null;
-        progressStatus = null;
-        progressPercentage = null;
-        progressBar = null;
-    }
-    
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        // Clean up resources
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
-        
-        // Clean up bitmap to prevent memory leaks
-        if (selectedIcon != null && !selectedIcon.isRecycled()) {
-            selectedIcon.recycle();
-            selectedIcon = null;
-        }
-        
-        // Don't shutdown the ApkModifier here as it's shared with MainActivity
-        // Just remove the callback
-        if (apkModifier != null) {
-            apkModifier.setProgressCallback(null);
-        }
-    }
-    
-    private void selectImage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ - Use new granular permissions
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES) 
-                    != PackageManager.PERMISSION_GRANTED) {
-                permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
-            } else {
-                openImagePicker();
+
+        amoledModeCard.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_AMOLED, activity, activity.findViewById(android.R.id.content));
             }
-        } else {
-            // Android 12 and below - Use legacy permissions
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) 
-                    != PackageManager.PERMISSION_GRANTED) {
-                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-            } else {
-                openImagePicker();
+        });
+
+        // Radio button listeners for visual feedback
+        lightModeRadio.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_LIGHT, activity, activity.findViewById(android.R.id.content));
             }
-        }
-    }
-    
-    private void openImagePicker() {
-        try {
-            imagePickerLauncher.launch("image/*");
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error opening image picker: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-    
-    private void showPermissionDeniedMessage() {
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Permission Required")
-            .setMessage("This app needs access to your photos to select an image for the app icon. Please grant the permission in Settings.")
-            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-            .setNegativeButton("Open Settings", (dialog, which) -> {
-                try {
-                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    intent.setData(Uri.parse("package:" + requireContext().getPackageName()));
-                    startActivity(intent);
-                } catch (Exception e) {
-                    Toast.makeText(requireContext(), "Could not open settings", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .show();
-    }
-    
-    private void handleImageResult(Uri imageUri) {
-        if (imageUri != null) {
-            try {
-                InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
-                if (inputStream == null) {
-                    Toast.makeText(requireContext(), "Error reading image file", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                // Recycle previous bitmap to prevent memory leaks
-                if (selectedIcon != null && !selectedIcon.isRecycled()) {
-                    selectedIcon.recycle();
-                }
-                
-                selectedIcon = BitmapFactory.decodeStream(inputStream);
-                inputStream.close();
-                
-                if (selectedIcon == null) {
-                    Toast.makeText(requireContext(), "Error decoding image", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                // Resize to 512x512 for app icon
-                Bitmap resizedIcon = Bitmap.createScaledBitmap(selectedIcon, 512, 512, true);
-                
-                // Recycle the original bitmap
-                if (selectedIcon != resizedIcon) {
-                    selectedIcon.recycle();
-                }
-                selectedIcon = resizedIcon;
-                
-                appIcon.setImageBitmap(selectedIcon);
-                appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                
-                // Save icon to internal storage
-                saveIconToInternalStorage(selectedIcon);
-                
-            } catch (Exception e) {
-                Log.e("AppearanceFragment", "Error loading image", e);
-                Toast.makeText(requireContext(), "Error loading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+
+        darkModeRadio.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_DARK, activity, activity.findViewById(android.R.id.content));
             }
-        }
-    }
-    
-    private void saveIconToInternalStorage(Bitmap bitmap) {
-        try {
-            File iconFile = new File(requireContext().getFilesDir(), "custom_icon.png");
-            FileOutputStream fos = new FileOutputStream(iconFile);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.close();
-            selectedIconPath = iconFile.getAbsolutePath();
-        } catch (IOException e) {
-            Log.e("AppearanceFragment", "Error saving icon", e);
-            Toast.makeText(requireContext(), "Error saving icon: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-    
-    private void startApkModification() {
-        try {
-            // Check if fragment is still attached
-            if (!isAdded() || getActivity() == null) {
-                Toast.makeText(requireContext(), "Fragment is no longer active", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            // Check if already processing
-            if (isProcessing) {
-                Toast.makeText(requireContext(), "APK installation already in progress", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            // Check if ApkModifier is already working
-            if (apkModifier != null && apkModifier.isModifying()) {
-                Toast.makeText(requireContext(), "APK installation already in progress", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            String newAppName = appNameInput.getText().toString().trim();
-            String newPackageName = packageNameInput.getText().toString().trim();
-            
-            // Validate inputs
-            if (newAppName.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter an app name", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            if (newPackageName.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter a package name", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            if (!isValidPackageName(newPackageName)) {
-                Toast.makeText(requireContext(), "Invalid package name format. Use: com.example.appname", Toast.LENGTH_LONG).show();
-                return;
-            }
-            
-            if (selectedIcon == null) {
-                Toast.makeText(requireContext(), "Please select an icon", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            // Check if Minecraft PE is installed
-            try {
-                requireContext().getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Minecraft PE Not Found")
-                    .setMessage("Minecraft PE (com.mojang.minecraftpe) is not installed on this device. Please install it first.")
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                    .setIcon(R.drawable.ic_info)
-                    .show();
-                return;
-            }
-            
-            // Validate ApkModifier is properly initialized
-            if (apkModifier == null) {
-                Toast.makeText(requireContext(), "Error: APK installer not initialized", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            // Show confirmation dialog
-            showConfirmationDialog(newAppName, newPackageName);
-            
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error starting APK installation: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-    
-    private void showConfirmationDialog(String appName, String packageName) {
-        try {
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Install Minecraft PE")
-                .setMessage("This will:\n\n" +
-                           "• Extract Minecraft PE APK from your device\n" +
-                           "• Install it using the system package installer\n" +
-                           "• Allow you to have multiple versions installed\n\n" +
-                           "This creates a copy of the original APK that can be installed alongside the existing version.\n\n" +
-                           "Continue?")
-                .setPositiveButton("Install Minecraft PE", (dialog, which) -> {
-                    try {
-                        // Check if fragment is still attached
-                        if (!isAdded() || getActivity() == null) {
-                            Toast.makeText(requireContext(), "Fragment is no longer active", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        
-                        showBottomProgressBar();
-                        showProgressDialog();
-                        
-                        // Start the APK extraction and installation process
-                        if (apkModifier != null) {
-                            apkModifier.modifyApk(appName, packageName, selectedIcon);
-                        } else {
-                            onError("APK installer not initialized");
-                        }
-                    } catch (Exception e) {
-                        onError("Failed to start APK installation: " + e.getMessage());
-                    }
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .setIcon(R.drawable.ic_build)
-                .show();
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error showing confirmation dialog: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-    
-    private boolean isValidPackageName(String packageName) {
-        // Basic package name validation
-        if (packageName == null || packageName.isEmpty()) {
-            return false;
-        }
-        
-        // Check if it contains at least one dot
-        if (!packageName.contains(".")) {
-            return false;
-        }
-        
-        // Check if it starts or ends with a dot
-        if (packageName.startsWith(".") || packageName.endsWith(".")) {
-            return false;
-        }
-        
-        // Check if it contains consecutive dots
-        if (packageName.contains("..")) {
-            return false;
-        }
-        
-        // Check each segment
-        String[] segments = packageName.split("\\.");
-        for (String segment : segments) {
-            if (segment.isEmpty()) {
-                return false;
-            }
-            
-            // Check if segment starts with a letter and contains only valid characters
-            if (!segment.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    private void showBottomProgressBar() {
-        // Check if the view is still valid and the fragment is attached
-        if (bottomProgressCard == null || !isAdded() || getActivity() == null) {
-            return;
-        }
-        
-        isProcessing = true;
-        isMinimized = false;
-        
-        // Show bottom progress bar with animation
-        bottomProgressCard.setVisibility(View.VISIBLE);
-        bottomProgressCard.setTranslationY(bottomProgressCard.getHeight());
-        bottomProgressCard.animate()
-                .translationY(0)
-                .setDuration(300)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .start();
-        
-        // Reset progress
-        if (bottomProgressBar != null) {
-            bottomProgressBar.setProgress(0);
-        }
-        if (bottomProgressPercentage != null) {
-            bottomProgressPercentage.setText("0%");
-        }
-        if (bottomProgressStatus != null) {
-            bottomProgressStatus.setText("Preparing...");
-        }
-    }
-    
-    private void hideBottomProgressBar() {
-        if (!isProcessing) return;
-        
-        isProcessing = false;
-        
-        // Check if the view is still valid and the fragment is attached
-        if (bottomProgressCard == null || !isAdded() || getActivity() == null) {
-            return;
-        }
-        
-        // Hide bottom progress bar with animation
-        bottomProgressCard.animate()
-                .translationY(bottomProgressCard.getHeight())
-                .setDuration(300)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .withEndAction(() -> {
-                    if (bottomProgressCard != null) {
-                        bottomProgressCard.setVisibility(View.GONE);
-                    }
-                })
-                .start();
-    }
-    
-    private void showProgressDialog() {
-        if (isMinimized) return;
-        
-        View progressView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_progress, null);
-        progressStatus = progressView.findViewById(R.id.progress_status);
-        progressPercentage = progressView.findViewById(R.id.progress_percentage);
-        progressBar = progressView.findViewById(R.id.progress_bar);
-        
-        progressDialog = new MaterialAlertDialogBuilder(requireContext())
-                .setView(progressView)
-                .setTitle("Modifying APK")
-                .setCancelable(false)
-                .create();
-        
-        progressDialog.show();
-    }
-    
-    private void showCancelConfirmation() {
-        try {
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Cancel APK Installation?")
-                .setMessage("Are you sure you want to cancel the APK installation process? This will stop the current operation.")
-                .setPositiveButton("Yes, Cancel", (dialog, which) -> {
-                    try {
-                        if (apkModifier != null) {
-                            apkModifier.cancelModification();
-                        }
-                        hideBottomProgressBar();
-                        if (progressDialog != null && progressDialog.isShowing()) {
-                            progressDialog.dismiss();
-                        }
-                        Toast.makeText(requireContext(), "APK installation cancelled", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(requireContext(), "Error cancelling installation: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("Continue", (dialog, which) -> dialog.dismiss())
-                .setIcon(R.drawable.ic_error)
-                .show();
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error showing cancel dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-    
-    private void animateProgressBar(int targetProgress) {
-        try {
-            if (bottomProgressBar != null) {
-                ValueAnimator animator = ValueAnimator.ofInt(bottomProgressBar.getProgress(), targetProgress);
-                animator.setDuration(200);
-                animator.setInterpolator(new AccelerateDecelerateInterpolator());
-                animator.addUpdateListener(animation -> {
-                    try {
-                        int progress = (int) animation.getAnimatedValue();
-                        if (bottomProgressBar != null) {
-                            bottomProgressBar.setProgress(progress);
-                        }
-                    } catch (Exception e) {
-                        Log.w("AppearanceFragment", "Error updating bottom progress bar", e);
-                    }
-                });
-                animator.start();
-            }
-            
-            if (progressBar != null) {
-                ValueAnimator animator = ValueAnimator.ofInt(progressBar.getProgress(), targetProgress);
-                animator.setDuration(200);
-                animator.setInterpolator(new AccelerateDecelerateInterpolator());
-                animator.addUpdateListener(animation -> {
-                    try {
-                        int progress = (int) animation.getAnimatedValue();
-                        if (progressBar != null) {
-                            progressBar.setProgress(progress);
-                        }
-                    } catch (Exception e) {
-                        Log.w("AppearanceFragment", "Error updating progress bar", e);
-                    }
-                });
-                animator.start();
-            }
-        } catch (Exception e) {
-            Log.w("AppearanceFragment", "Error animating progress bar", e);
-        }
-    }
-    
-    // ApkModifier.ProgressCallback implementation
-    @Override
-    public void onProgress(String status, int progress) {
-        if (!isAdded() || getActivity() == null) {
-            return;
-        }
-        
-        requireActivity().runOnUiThread(() -> {
-            try {
-                // Check if fragment is still attached after the delay
-                if (!isAdded() || getActivity() == null) {
-                    return;
-                }
-                
-                // Update dialog progress if visible
-                if (progressStatus != null) {
-                    progressStatus.setText(status != null ? status : "Processing...");
-                }
-                if (progressPercentage != null) {
-                    progressPercentage.setText(progress + "%");
-                }
-                if (progressBar != null) {
-                    animateProgressBar(progress);
-                }
-                
-                // Update bottom progress bar
-                if (bottomProgressStatus != null) {
-                    bottomProgressStatus.setText(status != null ? status : "Processing...");
-                }
-                if (bottomProgressPercentage != null) {
-                    bottomProgressPercentage.setText(progress + "%");
-                }
-                if (bottomProgressBar != null) {
-                    animateProgressBar(progress);
-                }
-            } catch (Exception e) {
-                Log.w("AppearanceFragment", "Error updating progress", e);
+        });
+
+        amoledModeRadio.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                MainActivity activity = (MainActivity) getActivity();
+                themeManager.setThemeMode(ThemeManager.THEME_AMOLED, activity, activity.findViewById(android.R.id.content));
             }
         });
     }
-    
-    @Override
-    public void onSuccess(String apkPath) {
-        if (!isAdded() || getActivity() == null) {
-            return;
-        }
+
+    private void updateThemeSelection() {
+        int currentTheme = themeManager.getCurrentThemeMode();
         
-        requireActivity().runOnUiThread(() -> {
-            try {
-                // Check if fragment is still attached after the delay
-                if (!isAdded() || getActivity() == null) {
-                    return;
-                }
-                
-                hideBottomProgressBar();
-                
-                if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
-                }
-                
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Success!")
-                    .setMessage("Minecraft PE APK has been extracted and the installation dialog should appear!\n\n" +
-                               "The system package installer will now guide you through the installation process.\n\n" +
-                               "This will create a copy of Minecraft PE that can be installed alongside your existing version.")
-                    .setPositiveButton("Great!", (dialog, which) -> dialog.dismiss())
-                    .setIcon(R.drawable.ic_check_circle)
-                    .show();
-            } catch (Exception e) {
-                Log.e("AppearanceFragment", "Error showing success dialog", e);
-                Toast.makeText(requireContext(), "Success! Installation dialog should appear.", Toast.LENGTH_LONG).show();
-            }
-        });
+        // Uncheck all radio buttons first
+        lightModeRadio.setChecked(false);
+        darkModeRadio.setChecked(false);
+        amoledModeRadio.setChecked(false);
+        
+        // Check the appropriate radio button
+        switch (currentTheme) {
+            case ThemeManager.THEME_LIGHT:
+                lightModeRadio.setChecked(true);
+                break;
+            case ThemeManager.THEME_DARK:
+                darkModeRadio.setChecked(true);
+                break;
+            case ThemeManager.THEME_AMOLED:
+                amoledModeRadio.setChecked(true);
+                break;
+            default:
+                darkModeRadio.setChecked(true);
+                break;
+        }
     }
-    
+
     @Override
-    public void onError(String error) {
-        if (!isAdded() || getActivity() == null) {
-            return;
-        }
-        
-        requireActivity().runOnUiThread(() -> {
-            try {
-                // Check if fragment is still attached after the delay
-                if (!isAdded() || getActivity() == null) {
-                    return;
-                }
-                
-                hideBottomProgressBar();
-                
-                if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
-                }
-                
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Error")
-                    .setMessage("Failed to install Minecraft PE:\n\n" + (error != null ? error : "Unknown error") + "\n\n" +
-                               "Please make sure:\n" +
-                               "• Minecraft PE is installed on your device\n" +
-                               "• You have enabled 'Install unknown apps' in settings\n" +
-                               "• You have granted necessary permissions")
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                    .setIcon(R.drawable.ic_error)
-                    .show();
-            } catch (Exception e) {
-                Log.e("AppearanceFragment", "Error showing error dialog", e);
-                Toast.makeText(requireContext(), "Error: " + (error != null ? error : "Unknown error"), Toast.LENGTH_LONG).show();
-            }
-        });
+    public void onResume() {
+        super.onResume();
+        // Update selection when returning to the fragment
+        updateThemeSelection();
     }
 }

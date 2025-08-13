@@ -34,21 +34,9 @@ public class SettingsFragment extends Fragment {
             }
         });
         
-        // Initialize all switches with Material You 3 design
+        // Initialize switches with Material You 3 design
         MaterialSwitch autoLaunchSwitch = view.findViewById(R.id.auto_launch_switch);
         MaterialSwitch notificationsSwitch = view.findViewById(R.id.notifications_switch);
-        MaterialSwitch themeSwitch = view.findViewById(R.id.theme_switch);
-        
-        // Set up theme switch
-        ThemeManager themeManager = ThemeManager.getInstance(requireContext());
-        themeSwitch.setChecked(themeManager.isDarkMode());
-        
-        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (getActivity() instanceof MainActivity) {
-                MainActivity activity = (MainActivity) getActivity();
-                activity.toggleTheme();
-            }
-        });
         
         // Set up auto launch switch
         autoLaunchSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -98,11 +86,11 @@ public class SettingsFragment extends Fragment {
     
     private void deleteMinecraftPE() {
         try {
-            Intent intent = new Intent(Intent.ACTION_DELETE);
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             intent.setData(android.net.Uri.parse("package:com.mojang.minecraftpe"));
             startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error deleting Minecraft PE", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Could not open Minecraft PE settings", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -113,6 +101,7 @@ public class SettingsFragment extends Fragment {
                     .replace(R.id.fragment_container, new AppearanceFragment())
                     .addToBackStack(null)
                     .commit();
+            activity.updateNavigationSelection(R.id.nav_settings);
         }
     }
 }

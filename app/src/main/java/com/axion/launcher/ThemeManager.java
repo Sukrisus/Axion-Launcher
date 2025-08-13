@@ -6,12 +6,14 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 
 public class ThemeManager {
     private static final String PREF_NAME = "theme_preferences";
@@ -19,6 +21,7 @@ public class ThemeManager {
     
     public static final int THEME_LIGHT = AppCompatDelegate.MODE_NIGHT_NO;
     public static final int THEME_DARK = AppCompatDelegate.MODE_NIGHT_YES;
+    public static final int THEME_AMOLED = 3; // Custom AMOLED mode
     
     private static ThemeManager instance;
     private SharedPreferences preferences;
@@ -35,7 +38,15 @@ public class ThemeManager {
     }
     
     public void setThemeMode(int themeMode) {
-        AppCompatDelegate.setDefaultNightMode(themeMode);
+        if (themeMode == THEME_AMOLED) {
+            // For AMOLED mode, we use dark mode but with custom colors
+            AppCompatDelegate.setDefaultNightMode(THEME_DARK);
+            // Set a custom theme attribute for AMOLED
+            preferences.edit().putBoolean("amoled_mode", true).apply();
+        } else {
+            AppCompatDelegate.setDefaultNightMode(themeMode);
+            preferences.edit().putBoolean("amoled_mode", false).apply();
+        }
         preferences.edit().putInt(KEY_THEME_MODE, themeMode).apply();
     }
     
@@ -44,15 +55,19 @@ public class ThemeManager {
     }
     
     public boolean isDarkMode() {
-        return getCurrentThemeMode() == THEME_DARK;
+        int mode = getCurrentThemeMode();
+        return mode == THEME_DARK || mode == THEME_AMOLED;
     }
     
-    public void toggleTheme(Activity activity, View rootView) {
+    public boolean isAmoledMode() {
+        return getCurrentThemeMode() == THEME_AMOLED && preferences.getBoolean("amoled_mode", false);
+    }
+    
+    public void setThemeMode(int themeMode, Activity activity, View rootView) {
         int currentMode = getCurrentThemeMode();
-        int newMode = (currentMode == THEME_DARK) ? THEME_LIGHT : THEME_DARK;
-        
-        // Create smooth fade animation
-        createSmoothThemeTransition(activity, rootView, newMode);
+        if (currentMode != themeMode) {
+            createSmoothThemeTransition(activity, rootView, themeMode);
+        }
     }
     
     private void createSmoothThemeTransition(Activity activity, View rootView, int newMode) {
@@ -60,8 +75,8 @@ public class ThemeManager {
         View overlay = new View(activity);
         
         // Set initial color based on current theme
-        int startColor = isDarkMode() ? Color.parseColor("#121212") : Color.parseColor("#FFFFFF");
-        int endColor = (newMode == THEME_DARK) ? Color.parseColor("#121212") : Color.parseColor("#FFFFFF");
+        int startColor = getCurrentThemeColor();
+        int endColor = getThemeColor(newMode);
         
         overlay.setBackgroundColor(startColor);
         
@@ -115,5 +130,58 @@ public class ThemeManager {
         // Start animations
         colorAnimator.start();
         fadeAnimator.start();
+    }
+    
+    private int getCurrentThemeColor() {
+        return getThemeColor(getCurrentThemeMode());
+    }
+    
+    private int getThemeColor(int themeMode) {
+        switch (themeMode) {
+            case THEME_LIGHT:
+                return Color.parseColor("#FFFFFF");
+            case THEME_DARK:
+                return Color.parseColor("#121212");
+            case THEME_AMOLED:
+                return Color.parseColor("#000000");
+            default:
+                return Color.parseColor("#121212");
+        }
+    }
+    
+    // Helper method to get AMOLED-aware colors
+    public int getAmoledAwareColor(Context context, int lightColorRes, int darkColorRes) {
+        if (isAmoledMode()) {
+            // Return true black for backgrounds in AMOLED mode
+            if (lightColorRes == R.color.background_color || 
+                lightColorRes == R.color.surface_color || 
+                lightColorRes == R.color.card_background) {
+                return Color.BLACK;
+            }
+            // Return slightly lighter black for surface variants
+            if (lightColorRes == R.color.surface_variant || 
+                lightColorRes == R.color.card_background_variant) {
+                return Color.parseColor("#0A0A0A");
+            }
+        }
+        
+        // Use normal theme colors
+        return ContextCompat.getColor(context, isDarkMode() ? darkColorRes : lightColorRes);
+    }
+    
+    // Legacy method for backward compatibility
+    public void toggleTheme(Activity activity, View rootView) {
+        int currentMode = getCurrentThemeMode();
+        int newMode;
+        
+        if (currentMode == THEME_LIGHT) {
+            newMode = THEME_DARK;
+        } else if (currentMode == THEME_DARK) {
+            newMode = THEME_AMOLED;
+        } else {
+            newMode = THEME_LIGHT;
+        }
+        
+        createSmoothThemeTransition(activity, rootView, newMode);
     }
 }
