@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_dashboard"
+            android:title="@string/dashboard" />
+        <item
+            android:id="@+id/nav_version_manager"
+            android:icon="@drawable/ic_swap_horiz"
+            android:title="@string/version_manager" />
+        <item
+            android:id="@+id/nav_resource_installer"
+            android:icon="@drawable/ic_package"
+            android:title="@string/resource_installer" />
+        <item
+            android:id="@+id/nav_resource_manager"
+            android:icon="@drawable/ic_folder"
+            android:title="@string/resource_manager" />
+        <item
+            android:id="@+id/nav_tools"
+            android:icon="@drawable/ic_build"
+            android:title="@string/tools" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings" />
+        <item
+            android:id="@+id/nav_info"
+            android:icon="@drawable/ic_info"
+            android:title="@string/information" />
+    </group>
+</menu>
