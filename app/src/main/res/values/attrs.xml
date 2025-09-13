@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Inverse Color Attributes -->
+    <attr name="colorInverseSurface" format="color" />
+    <attr name="colorOnInverseSurface" format="color" />
+    <attr name="colorInversePrimary" format="color" />
+    
+    <!-- Material 3 Motion Duration Attributes -->
+    <attr name="motionDurationShort1" format="integer" />
+    <attr name="motionDurationShort2" format="integer" />
+    <attr name="motionDurationShort3" format="integer" />
+    <attr name="motionDurationShort4" format="integer" />
+    <attr name="motionDurationMedium1" format="integer" />
+    <attr name="motionDurationMedium2" format="integer" />
+    <attr name="motionDurationMedium3" format="integer" />
+    <attr name="motionDurationMedium4" format="integer" />
+    <attr name="motionDurationLong1" format="integer" />
+    <attr name="motionDurationLong2" format="integer" />
+    <attr name="motionDurationLong3" format="integer" />
+    <attr name="motionDurationLong4" format="integer" />
+    <attr name="motionDurationExtraLong1" format="integer" />
+    <attr name="motionDurationExtraLong2" format="integer" />
+    <attr name="motionDurationExtraLong3" format="integer" />
+    <attr name="motionDurationExtraLong4" format="integer" />
+    
+    <!-- Material 3 Motion Easing Attributes -->
+    <attr name="motionEasingEmphasized" format="string" />
+    <attr name="motionEasingEmphasizedDecelerate" format="string" />
+    <attr name="motionEasingEmphasizedAccelerate" format="string" />
+    <attr name="motionEasingStandard" format="string" />
+    <attr name="motionEasingStandardDecelerate" format="string" />
+    <attr name="motionEasingStandardAccelerate" format="string" />
+</resources>
