@@ -1,42 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material You 3 Color Palette - Dark Theme -->
+    <!-- Material 3 Expressive Color Palette - Dark Theme -->
+    
+    <!-- Primary Colors -->
     <color name="primary_color">#D0BCFF</color>
+    <color name="primary">#D0BCFF</color>
+    <color name="text_on_primary">#381E72</color>
+    <color name="primary_container">#4F378B</color>
+    <color name="text_on_primary_container">#EADDFF</color>
+    
+    <!-- Secondary Colors -->
+    <color name="secondary">#CCC2DC</color>
+    <color name="text_on_secondary">#332D41</color>
+    <color name="secondary_container">#4A4458</color>
+    <color name="text_on_secondary_container">#E8DEF8</color>
+    
+    <!-- Tertiary Colors -->
+    <color name="tertiary">#EFB8C8</color>
+    <color name="text_on_tertiary">#492532</color>
+    <color name="tertiary_container">#633B48</color>
+    <color name="text_on_tertiary_container">#FFD8E4</color>
+    
+    <!-- Surface Colors -->
+    <color name="surface">#141218</color>
+    <color name="text_on_surface">#E6E1E5</color>
+    <color name="surface_variant">#49454F</color>
+    <color name="text_on_surface_variant">#CAC4D0</color>
+    <color name="surface_container">#1E1A23</color>
+    <color name="surface_container_high">#2B2930</color>
+    <color name="surface_container_highest">#36343B</color>
+    <color name="surface_bright">#3B383E</color>
+    <color name="surface_dim">#0F0D13</color>
+    
+    <!-- Background Colors -->
+    <color name="background">#141218</color>
+    <color name="text_on_background">#E6E1E5</color>
+    
+    <!-- Outline Colors -->
+    <color name="outline">#938F99</color>
+    <color name="outline_variant">#49454F</color>
+    
+    <!-- Error Colors -->
+    <color name="error">#F2B8B5</color>
+    <color name="text_on_error">#601410</color>
+    <color name="error_container">#93000A</color>
+    <color name="text_on_error_container">#FFDAD6</color>
+    
+    <!-- Inverse Colors -->
+    <color name="inverse_surface">#E6E1E5</color>
+    <color name="text_on_inverse_surface">#313033</color>
+    <color name="inverse_primary">#6750A4</color>
+    
+    <!-- Legacy Colors for Backward Compatibility -->
     <color name="primary_dark">#B69DF8</color>
     <color name="primary_light">#E8DEF8</color>
     <color name="accent_color">#CAC4D0</color>
-    
-    <!-- Material You 3 Surface Colors -->
     <color name="surface_color">#1C1B1F</color>
-    <color name="surface_variant">#49454F</color>
-    <color name="surface_bright">#2B2930</color>
-    <color name="surface_dim">#141218</color>
-    
-    <!-- Material You 3 Text Colors -->
     <color name="primary_text_color">#E6E1E5</color>
     <color name="secondary_text_color">#CAC4D0</color>
     <color name="tertiary_text_color">#938F99</color>
     <color name="text_on_primary">#381E72</color>
     <color name="text_on_surface">#E6E1E5</color>
-    
-    <!-- Material You 3 Background Colors -->
     <color name="background_color">#141218</color>
     <color name="card_background">#1C1B1F</color>
     <color name="card_background_variant">#2B2930</color>
-    
-    <!-- Material You 3 Status Colors -->
     <color name="success_color">#9CCC65</color>
     <color name="error_color">#F2B8B5</color>
     <color name="warning_color">#FDDC22</color>
-    
-    <!-- Material You 3 Outline Colors -->
     <color name="outline_color">#938F99</color>
-    <color name="outline_variant">#49454F</color>
-    
-    <!-- Material You 3 State Colors -->
     <color name="state_layer_primary">#D0BCFF</color>
     <color name="state_layer_surface">#E6E1E5</color>
-    
-    <!-- Status Bar -->
     <color name="status_bar_color">@color/surface_dim</color>
 </resources>

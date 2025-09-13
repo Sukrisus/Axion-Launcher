@@ -1,41 +1,51 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Material You 3 Base application theme -->
+    <!-- Material 3 Expressive Base application theme -->
     <style name="Theme.AxionLauncher" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Material You 3 Color Attributes -->
+        <!-- Material 3 Expressive Color Attributes -->
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorOnPrimary">@color/text_on_primary</item>
-        <item name="colorPrimaryContainer">@color/primary_light</item>
-        <item name="colorOnPrimaryContainer">@color/text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/text_on_primary_container</item>
         
-        <item name="colorSecondary">@color/accent_color</item>
-        <item name="colorOnSecondary">@color/text_on_surface</item>
-        <item name="colorSecondaryContainer">@color/surface_variant</item>
-        <item name="colorOnSecondaryContainer">@color/text_on_surface</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/text_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/text_on_secondary_container</item>
         
-        <item name="colorTertiary">@color/primary_dark</item>
-        <item name="colorOnTertiary">@color/text_on_primary</item>
-        <item name="colorTertiaryContainer">@color/primary_light</item>
-        <item name="colorOnTertiaryContainer">@color/text_on_primary</item>
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/text_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/text_on_tertiary_container</item>
         
-        <!-- Material You 3 Surface Colors -->
-        <item name="colorSurface">@color/surface_color</item>
+        <!-- Material 3 Expressive Surface Colors -->
+        <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/text_on_surface</item>
         <item name="colorSurfaceVariant">@color/surface_variant</item>
-        <item name="colorOnSurfaceVariant">@color/secondary_text_color</item>
+        <item name="colorOnSurfaceVariant">@color/text_on_surface_variant</item>
+        <item name="colorSurfaceContainer">@color/surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_container_highest</item>
+        <item name="colorSurfaceBright">@color/surface_bright</item>
+        <item name="colorSurfaceDim">@color/surface_dim</item>
         
-        <!-- Material You 3 Background Colors -->
-        <item name="android:colorBackground">@color/background_color</item>
-        <item name="colorOnBackground">@color/text_on_surface</item>
+        <!-- Material 3 Expressive Background Colors -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/text_on_background</item>
         
-        <!-- Material You 3 Outline Colors -->
-        <item name="colorOutline">@color/outline_color</item>
+        <!-- Material 3 Expressive Outline Colors -->
+        <item name="colorOutline">@color/outline</item>
         <item name="colorOutlineVariant">@color/outline_variant</item>
         
-        <!-- Material You 3 Error Colors -->
-        <item name="colorError">@color/error_color</item>
-        <item name="colorOnError">@color/text_on_surface</item>
-        <item name="colorErrorContainer">@color/surface_variant</item>
-        <item name="colorOnErrorContainer">@color/error_color</item>
+        <!-- Material 3 Expressive Error Colors -->
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/text_on_error</item>
+        <item name="colorErrorContainer">@color/error_container</item>
+        <item name="colorOnErrorContainer">@color/text_on_error_container</item>
+        
+        <!-- Material 3 Expressive Inverse Colors -->
+        <item name="colorInverseSurface">@color/inverse_surface</item>
+        <item name="colorOnInverseSurface">@color/text_on_inverse_surface</item>
+        <item name="colorInversePrimary">@color/inverse_primary</item>
         
         <!-- Status bar and Navigation bar -->
         <item name="android:statusBarColor">@color/surface_dim</item>
@@ -43,17 +53,49 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
         
-        <!-- Material You 3 Typography -->
+        <!-- Material 3 Expressive Typography -->
         <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Material3.HeadlineLarge</item>
         <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Material3.HeadlineMedium</item>
         <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Material3.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Material3.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Material3.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Material3.TitleSmall</item>
         <item name="textAppearanceBodyLarge">@style/TextAppearance.Material3.BodyLarge</item>
         <item name="textAppearanceBodyMedium">@style/TextAppearance.Material3.BodyMedium</item>
         <item name="textAppearanceBodySmall">@style/TextAppearance.Material3.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Material3.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Material3.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Material3.LabelSmall</item>
         
-        <!-- Material You 3 Shape -->
+        <!-- Material 3 Expressive Shape -->
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Material3.SmallComponent</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Material3.MediumComponent</item>
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Material3.LargeComponent</item>
+        
+        <!-- Material 3 Expressive Motion -->
+        <item name="motionDurationShort1">@integer/motion_duration_short1</item>
+        <item name="motionDurationShort2">@integer/motion_duration_short2</item>
+        <item name="motionDurationShort3">@integer/motion_duration_short3</item>
+        <item name="motionDurationShort4">@integer/motion_duration_short4</item>
+        <item name="motionDurationMedium1">@integer/motion_duration_medium1</item>
+        <item name="motionDurationMedium2">@integer/motion_duration_medium2</item>
+        <item name="motionDurationMedium3">@integer/motion_duration_medium3</item>
+        <item name="motionDurationMedium4">@integer/motion_duration_medium4</item>
+        <item name="motionDurationLong1">@integer/motion_duration_long1</item>
+        <item name="motionDurationLong2">@integer/motion_duration_long2</item>
+        <item name="motionDurationLong3">@integer/motion_duration_long3</item>
+        <item name="motionDurationLong4">@integer/motion_duration_long4</item>
+        <item name="motionDurationExtraLong1">@integer/motion_duration_extra_long1</item>
+        <item name="motionDurationExtraLong2">@integer/motion_duration_extra_long2</item>
+        <item name="motionDurationExtraLong3">@integer/motion_duration_extra_long3</item>
+        <item name="motionDurationExtraLong4">@integer/motion_duration_extra_long4</item>
+        
+        <!-- Material 3 Expressive Easing -->
+        <item name="motionEasingEmphasized">@string/motion_easing_emphasized</item>
+        <item name="motionEasingEmphasizedDecelerate">@string/motion_easing_emphasized_decelerate</item>
+        <item name="motionEasingEmphasizedAccelerate">@string/motion_easing_emphasized_accelerate</item>
+        <item name="motionEasingStandard">@string/motion_easing_standard</item>
+        <item name="motionEasingStandardDecelerate">@string/motion_easing_standard_decelerate</item>
+        <item name="motionEasingStandardAccelerate">@string/motion_easing_standard_accelerate</item>
     </style>
 </resources>

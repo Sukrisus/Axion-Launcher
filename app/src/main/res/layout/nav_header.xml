@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="200dp"
-    android:background="@color/surface_variant"
+    android:background="?attr/colorSurfaceVariant"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="24dp"
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        android:textColor="@color/text_on_surface" />
+        android:textColor="?attr/colorOnSurface" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,6 +30,6 @@
         android:layout_marginTop="4dp"
         android:text="@string/app_tagline"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-        android:textColor="@color/secondary_text_color" />
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
 </LinearLayout>

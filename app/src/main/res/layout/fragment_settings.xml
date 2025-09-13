@@ -17,18 +17,19 @@
             android:layout_marginBottom="24dp"
             android:text="@string/settings"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineLarge"
-            android:textColor="@color/text_on_surface" />
+            android:textColor="?attr/colorOnSurface" />
 
         <!-- General Settings Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@color/card_background"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
-            app:strokeColor="@color/outline_variant"
-            app:strokeWidth="1dp">
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp"
+            style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,7 +43,7 @@
                     android:layout_marginBottom="24dp"
                     android:text="@string/general_settings"
                     android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                    android:textColor="@color/text_on_surface" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <!-- Auto Launch Switch -->
                 <LinearLayout
@@ -63,7 +64,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/auto_launch"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:textColor="@color/text_on_surface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -71,7 +72,7 @@
                             android:layout_marginTop="2dp"
                             android:text="Automatically launch after selection"
                             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                            android:textColor="@color/secondary_text_color" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 
@@ -102,7 +103,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/notifications"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:textColor="@color/text_on_surface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -110,7 +111,7 @@
                             android:layout_marginTop="2dp"
                             android:text="Show app notifications and updates"
                             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                            android:textColor="@color/secondary_text_color" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 
@@ -140,7 +141,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/dark_mode"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:textColor="@color/text_on_surface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -148,7 +149,7 @@
                             android:layout_marginTop="2dp"
                             android:text="Use dark theme for better battery life"
                             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                            android:textColor="@color/secondary_text_color" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 
@@ -173,11 +174,12 @@
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
-            app:cardBackgroundColor="@color/card_background"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
-            app:strokeColor="@color/outline_variant"
-            app:strokeWidth="1dp">
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp"
+            style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -213,7 +215,7 @@
                         android:layout_height="wrap_content"
                         android:text="Appearance"
                         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                        android:textColor="@color/text_on_surface" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -221,7 +223,7 @@
                         android:layout_marginTop="4dp"
                         android:text="Customize app icon, name and package"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                        android:textColor="@color/secondary_text_color" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -240,11 +242,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@color/card_background"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
-            app:strokeColor="@color/outline_variant"
-            app:strokeWidth="1dp">
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp"
+            style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -258,7 +261,7 @@
                     android:layout_marginBottom="24dp"
                     android:text="@string/about"
                     android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                    android:textColor="@color/text_on_surface" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -266,14 +269,14 @@
                     android:layout_marginBottom="12dp"
                     android:text="@string/app_version"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                    android:textColor="@color/secondary_text_color" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/developer_info"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                    android:textColor="@color/secondary_text_color" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
@@ -283,11 +286,12 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_background"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
-            app:strokeColor="@color/outline_variant"
-            app:strokeWidth="1dp">
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp"
+            style="@style/Widget.Material3.CardView.Elevated">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -306,7 +310,7 @@
                         android:layout_height="wrap_content"
                         android:text="Delete Minecraft PE"
                         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                        android:textColor="@color/text_on_surface" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -314,7 +318,7 @@
                         android:layout_marginTop="4dp"
                         android:text="Remove Minecraft PE from device"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                        android:textColor="@color/secondary_text_color" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -326,7 +330,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:src="@drawable/ic_delete"
-                    app:tint="@color/error_color" />
+                    app:tint="?attr/colorError" />
 
             </LinearLayout>
 
