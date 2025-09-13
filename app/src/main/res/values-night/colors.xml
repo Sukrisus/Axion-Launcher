@@ -22,7 +22,6 @@
     
     <!-- Surface Colors -->
     <color name="surface">#141218</color>
-    <color name="text_on_surface">#E6E1E5</color>
     <color name="surface_variant">#49454F</color>
     <color name="text_on_surface_variant">#CAC4D0</color>
     <color name="surface_container">#1E1A23</color>
