@@ -59,8 +59,7 @@
     <color name="primary_text_color">#E6E1E5</color>
     <color name="secondary_text_color">#CAC4D0</color>
     <color name="tertiary_text_color">#938F99</color>
-    <color name="text_on_primary">#381E72</color>
-    <color name="text_on_surface">#E6E1E5</color>
+    
     <color name="background_color">#141218</color>
     <color name="card_background">#1C1B1F</color>
     <color name="card_background_variant">#2B2930</color>
